@@ -1,22 +1,29 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Функция управления видимостью элементов при вводе
+// Улучшенная функция скрытия интерфейса
 function toggleUI(isFocused) {
     const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
+    const scrollContainer = document.querySelector('.scroll-container');
     
     if (isFocused) {
-        if (totalBar) totalBar.classList.add('ui-hide');
-        bottomNav.classList.add('ui-hide');
+        // Полностью удаляем элементы из видимости
+        if (totalBar) totalBar.classList.add('hidden');
+        bottomNav.classList.add('hidden');
+        // Расширяем контейнер списка на весь экран
+        if (scrollContainer) scrollContainer.classList.add('full-height');
     } else {
-        // Задержка, чтобы элементы не мерцали при переходе между полями
+        // Возвращаем всё назад с небольшой задержкой
         setTimeout(() => {
             if (document.activeElement.tagName !== 'INPUT') {
-                if (totalBar) totalBar.classList.remove('ui-hide');
-                bottomNav.classList.remove('ui-hide');
+                if (totalBar) totalBar.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
+                if (scrollContainer) scrollContainer.classList.remove('full-height');
+                // Прокрутка вниз к последнему элементу при закрытии клавиатуры
+                if (scrollContainer) scrollContainer.scrollTo({top: scrollContainer.scrollHeight, behavior: 'smooth'});
             }
-        }, 100);
+        }, 150);
     }
 }
 
@@ -65,19 +72,23 @@ function createNewRow() {
     `;
     container.appendChild(div);
 
-    div.querySelector('.item-price').addEventListener('keydown', (e) => {
+    const priceInput = div.querySelector('.item-price');
+    priceInput.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             e.preventDefault();
             createNewRow();
             setTimeout(() => {
                 const rows = document.querySelectorAll('.item-name');
-                rows[rows.length - 1].focus();
+                const lastRow = rows[rows.length - 1];
+                lastRow.focus();
+                // Авто-скролл к новой строке
+                lastRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 50);
         }
     });
 }
 
-// Инициализация первой строки
+// Старт приложения
 createNewRow();
 
 function updateTotal() {
@@ -93,7 +104,7 @@ function saveAndHome() {
     showScreen('screen-home', document.querySelector('.tab-item'), 0);
 }
 
-// Слушатель для ввода в конвертере
+// Конвертер
 const convInput = document.getElementById('conv-input');
 if(convInput) {
     convInput.addEventListener('focus', () => toggleUI(true));
