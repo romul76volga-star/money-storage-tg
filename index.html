@@ -19,34 +19,36 @@
 
     <main id="app-content">
         <section id="screen-home" class="screen active">
-            <div id="cards-container" class="cards-grid scrollable-area">
+            <div id="cards-container" class="scrollable-content cards-grid">
                 </div>
         </section>
 
         <section id="screen-counter" class="screen">
-            <div class="counter-layout">
-                <div id="items-list" class="scrollable-area rows-padding">
-                    </div>
-                
+            <div id="items-list" class="scrollable-content">
+                </div>
+            
+            <div class="bottom-controls">
                 <div class="add-row-trigger" onclick="createNewRow()">
                     <div class="add-box-border"><span>+</span></div>
                 </div>
-
                 <div id="total-bar" class="total-plate">
-                    <div class="total-text">ОБЩАЯ СУММА ЗАТРАТ</div>
-                    <div class="total-sum"><span id="total-value">0</span></div>
+                    <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
+                    <div class="total-sum" id="total-value">0</div>
                 </div>
             </div>
         </section>
 
         <section id="screen-converter" class="screen">
-            <div class="scrollable-area rows-padding">
-                <div class="glass-box"><h3>Конвертер</h3><p>В разработке</p></div>
+            <div class="scrollable-content">
+                <div class="glass-box">
+                    <h3>Конвертер</h3>
+                    <p>Раздел в разработке</p>
+                </div>
             </div>
         </section>
 
         <section id="screen-settings" class="screen">
-            <div class="scrollable-area rows-padding">
+            <div class="scrollable-content">
                 <div class="glass-box">
                     <h3>Профиль</h3>
                     <button class="danger-btn" onclick="clearData()">Очистить все данные</button>
