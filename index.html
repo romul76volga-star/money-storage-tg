@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body>
+<body onclick="handleGlobalClick(event)">
     <div id="modal-overlay" class="modal-overlay hidden">
         <div class="modal-card glass">
             <button class="close-modal-btn" onclick="closeSaveModal()">✕</button>
@@ -47,7 +47,7 @@
                     <div class="curr-select glass-border">
                         <div>🇷🇺</div><div>RUB</div>
                     </div>
-                    <img src="assets/swap.png" class="swap-icon">
+                    <div class="swap-icon">⇄</div>
                     <div class="curr-select glass-border">
                         <div>🇺🇸</div><div>USD</div>
                     </div>
@@ -59,10 +59,10 @@
         <section id="screen-settings" class="screen">
             <div class="profile-section">
                 <div id="user-avatar" class="avatar-big"></div>
-                <h2 id="user-name">Загрузка...</h2>
+                <h2 id="user-name">Пользователь</h2>
                 <div class="settings-box glass">
                     <div class="s-row"><span>Версия</span><span>1.5.0</span></div>
-                    <div class="s-row" onclick="clearData()"><span>Очистить всё</span><span>→</span></div>
+                    <div class="s-row" onclick="clearAllData()"><span>Очистить всё</span><span>→</span></div>
                 </div>
             </div>
         </section>
@@ -70,9 +70,15 @@
 
     <nav id="bottom-nav" class="tab-bar">
         <div id="tab-indicator"></div>
-        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">
+            <img src="assets/home.png" alt="home">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)">
+            <img src="assets/dollar.png" alt="conv">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
+            <img src="assets/gear.png" alt="settings">
+        </div>
     </nav>
 
     <script src="script.js"></script>
