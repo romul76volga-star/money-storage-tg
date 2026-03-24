@@ -2,18 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Money App</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div id="app">
         <section id="screen-home" class="screen active">
-            <div class="empty-state" id="empty-view">
+            <div id="empty-view" class="center-content">
                 <button class="add-main-btn" onclick="showScreen('screen-counter')">
                     <img src="assets/plus.png" alt="add">
                 </button>
-                <p>добавить</p>
+                <p>Добавить расход</p>
             </div>
             <div id="saved-data-view" class="hidden">
                 </div>
@@ -21,31 +22,30 @@
 
         <section id="screen-counter" class="screen">
             <header class="glass-header">
-                <span>счетчик</span>
+                <span class="title">Счетчик</span>
                 <button class="save-check-btn" onclick="saveAndHome()">✓</button>
             </header>
             <div id="items-list" class="scroll-container">
-                <div class="input-row">
-                    <input type="text" placeholder="товар..." class="item-name">
-                    <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()">
                 </div>
-            </div>
-            <div class="total-bar">
-                <div id="total-value">0</div>
+            <div class="total-container">
+                <div class="total-label">ОБЩАЯ СУММА ЗА ТОВАРЫ</div>
+                <div class="total-box">
+                    <span id="total-value">0</span>
+                </div>
             </div>
         </section>
 
         <section id="screen-converter" class="screen">
-            <header class="glass-header">конвертер</header>
-            <div class="converter-container">
-                <input type="number" id="conv-input" value="1000" oninput="convertCurrency()">
-                
-                <div class="currency-selectors">
-                    <div class="select-box" onclick="toggleCurrencyList('from')">
+            <header class="glass-header">
+                <span class="title">Конвертер</span>
+            </header>
+            <div class="converter-card glass">
+                <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
+                <div class="currency-row">
+                    <div class="select-box" onclick="toggleCurrency('from')">
                         <span id="from-flag">🇷🇺</span> <span id="from-code">RUB</span>
                     </div>
-                    <img src="assets/swap.png" class="swap-icon">
-                    <div class="select-box" onclick="toggleCurrencyList('to')">
+                    <div class="select-box" onclick="toggleCurrency('to')">
                         <span id="to-flag">🇺🇸</span> <span id="to-code">USD</span>
                     </div>
                 </div>
@@ -54,15 +54,19 @@
         </section>
 
         <section id="screen-settings" class="screen">
-            <header class="glass-header">настройки</header>
-            <div class="profile-card glass">
-                <div class="avatar"></div>
-                <div class="nickname">никнейм</div>
+            <header class="glass-header">
+                <span class="title">Настройки</span>
+            </header>
+            <div class="profile-section glass">
+                <div class="avatar-circle"></div>
+                <div class="user-info">
+                    <h2 id="user-name">Пользователь</h2>
+                    <p>Standard Plan</p>
+                </div>
             </div>
-            <div class="divider"></div>
         </section>
 
-        <nav class="tab-bar">
+        <nav class="tab-bar glass">
             <div class="tab-item active" onclick="showScreen('screen-home', this)">
                 <img src="assets/home.png">
             </div>
