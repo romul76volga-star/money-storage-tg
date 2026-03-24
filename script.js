@@ -1,69 +1,83 @@
-// 1. Инициализация Telegram
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
+
+// 1. Плавный индикатор меню
+function moveIndicator(index) {
+    const indicator = document.getElementById('tab-indicator');
+    const positions = ['7.5%', '41%', '74.5%']; // Координаты для прыжка кружка
+    indicator.style.left = positions[index];
+}
 
 // 2. Переключение экранов
 function showScreen(screenId, el) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
-    // Подсветка кнопок в меню
     if(el) {
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
+        // Автоматически двигаем индикатор при смене экрана
+        const index = Array.from(el.parentNode.children).indexOf(el) - 1; // -1 из-за индикатора
+        if(index >= 0) moveIndicator(index);
     }
 }
 
-// 3. Логика счетчика (создание строк)
+// 3. Создание строк (одна за другой)
 function createNewRow() {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="text" placeholder="Товар..." class="item-name">
-        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()">
+        <input type="text" placeholder="товар..." class="item-name">
+        <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()">
     `;
     container.appendChild(div);
 
-    // Логика нажатия Enter: создаем новую строку и переходим на неё
-    const inputs = div.querySelectorAll('input');
-    inputs[1].addEventListener('keydown', (e) => {
+    const priceInput = div.querySelector('.item-price');
+    priceInput.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
+            e.preventDefault();
             createNewRow();
             setTimeout(() => {
-                const allNames = document.querySelectorAll('.item-name');
-                allNames[allNames.length - 1].focus();
-            }, 50);
+                const names = document.querySelectorAll('.item-name');
+                names[names.length - 1].focus();
+            }, 10);
         }
     });
 }
 
-// Создаем первые 3 пустые строки при запуске
-for(let i=0; i<3; i++) { createNewRow(); }
+// Запуск первой строки
+if(document.getElementById('items-list')) createNewRow();
 
-// 4. Подсчет общей суммы
+// 4. Подсчет итога
 function updateTotal() {
     let total = 0;
-    const prices = document.querySelectorAll('.item-price');
-    prices.forEach(input => {
+    document.querySelectorAll('.item-price').forEach(input => {
         total += Number(input.value) || 0;
     });
     document.getElementById('total-value').innerText = total;
 }
 
-// 5. Конвертер валют
+// 5. Конвертер
+async function convertCurrency() {
+    const amt = document.getElementById('conv-input').value;
+    const from = document.getElementById('from-code').innerText;
+    const to = document.getElementById('to-code').innerText;
+    if(!amt) return;
+    try {
+        const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
+        const data = await res.json();
+        const result = (amt * data.rates[to]).toFixed(2);
+        document.getElementById('conv-result').innerText = `≈ ${result} ${to}`;
+    } catch {
+        document.getElementById('conv-result').innerText = "Ошибка курса";
+    }
+}
+
 let pickingSide = 'from';
-
-function openCurrencyPicker(side) {
-    pickingSide = side;
-    document.getElementById('currency-picker').classList.remove('hidden');
-}
-
-function closeCurrencyPicker() {
-    document.getElementById('currency-picker').classList.add('hidden');
-}
-
+function openCurrencyPicker(side) { pickingSide = side; document.getElementById('currency-picker').classList.remove('hidden'); }
+function closeCurrencyPicker() { document.getElementById('currency-picker').classList.add('hidden'); }
 function selectCurrency(flag, code) {
     document.getElementById(`${pickingSide}-flag`).innerText = flag;
     document.getElementById(`${pickingSide}-code`).innerText = code;
@@ -71,70 +85,39 @@ function selectCurrency(flag, code) {
     convertCurrency();
 }
 
-async function convertCurrency() {
-    const amt = document.getElementById('conv-input').value;
-    const from = document.getElementById('from-code').innerText;
-    const to = document.getElementById('to-code').innerText;
-    
-    if(!amt) return;
-
-    try {
-        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
-        const data = await response.json();
-        const rate = data.rates[to];
-        const res = (amt * rate).toFixed(2);
-        document.getElementById('conv-result').innerText = `≈ ${res} ${to}`;
-    } catch (error) {
-        document.getElementById('conv-result').innerText = "Курс недоступен";
-    }
-}
-
-// 6. Сохранение данных (localStorage)
+// 6. Сохранение
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
-    if(total == "0") {
-        tg.showAlert("Введите сумму больше 0!");
-        return;
-    }
-    
-    localStorage.setItem('user_total_save', total);
+    if(total === "0") return tg.showAlert("Сначала введите сумму!");
+    localStorage.setItem('saved_money', total);
+    tg.HapticFeedback.notificationOccurred('success');
     renderHome();
-    showScreen('screen-home');
-    tg.HapticFeedback.notificationOccurred('success'); // Вибрация при успехе
+    showScreen('screen-home', document.querySelector('.tab-item:first-child'));
+    moveIndicator(0);
 }
 
 function renderHome() {
-    const saved = localStorage.getItem('user_total_save');
-    const emptyView = document.getElementById('empty-view');
-    const savedView = document.getElementById('saved-data-view');
-
+    const saved = localStorage.getItem('saved_money');
+    const view = document.getElementById('saved-data-view');
+    const empty = document.getElementById('empty-view');
     if(saved) {
-        emptyView.classList.add('hidden');
-        savedView.classList.remove('hidden');
-        savedView.innerHTML = `
-            <div class="glass" style="padding: 30px; text-align: center; width: 90%;">
-                <p style="opacity: 0.7; margin: 0;">Последние затраты:</p>
-                <h1 style="font-size: 50px; margin: 10px 0;">${saved} ₽</h1>
-                <button onclick="clearData()" style="background: none; border: 1px solid white; color: white; padding: 10px 20px; border-radius: 12px;">Очистить</button>
-            </div>
-        `;
+        empty.classList.add('hidden');
+        view.classList.remove('hidden');
+        view.innerHTML = `<div class="glass" style="padding:40px; text-align:center;">
+            <p style="opacity:0.6">Последний итог:</p>
+            <h1 style="font-size:45px; margin:10px 0;">${saved} ₽</h1>
+            <button onclick="localStorage.clear(); location.reload();" style="background:none; border:1px solid white; color:white; padding:10px; border-radius:10px;">Сбросить</button>
+        </div>`;
     }
 }
 
-function clearData() {
-    localStorage.removeItem('user_total_save');
-    location.reload();
-}
-
-// 7. Профиль (Данные из Телеграм)
-if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    const user = tg.initDataUnsafe.user;
-    document.getElementById('user-name').innerText = user.first_name || "Пользователь";
-    if(user.photo_url) {
-        document.getElementById('user-avatar').style.backgroundImage = `url(${user.photo_url})`;
+// Данные пользователя Telegram
+if(tg.initDataUnsafe?.user) {
+    document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+    if(tg.initDataUnsafe.user.photo_url) {
+        document.getElementById('user-avatar').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
     }
 }
 
-// Запуск функций при старте
 renderHome();
 convertCurrency();
