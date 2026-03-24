@@ -14,8 +14,9 @@
             <div id="modal-total-value" class="modal-total-amount">0</div>
             <div class="modal-actions">
                 <button class="modal-btn confirm" onclick="confirmSave()">✓</button>
-                <button class="modal-btn cancel" onclick="cancelSave()">✕</button>
+                <button class="modal-btn cancel" id="modal-cancel-btn" onclick="cancelSave()">✕</button>
             </div>
+            <div id="modal-hint" style="font-size: 10px; margin-top: 15px; opacity: 0.5;"></div>
         </div>
     </div>
 
@@ -70,7 +71,7 @@
                 <div id="user-avatar" class="avatar-big"></div>
                 <h2 id="user-name">Загрузка...</h2>
                 <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.1.2</span></div>
+                    <div class="s-row"><span>Версия</span><span>1.1.5</span></div>
                     <div class="s-row" onclick="clearData()"><span>Сбросить данные</span><span style="color:#ff453a">→</span></div>
                 </div>
             </div>
