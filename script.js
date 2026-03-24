@@ -1,36 +1,34 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Улучшенная функция скрытия интерфейса
-function toggleUI(isFocused) {
+// Умное скрытие интерфейса
+function toggleUI(isFocused, element = null) {
     const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
     const scrollContainer = document.querySelector('.scroll-container');
     
     if (isFocused) {
-        // Полностью удаляем элементы из видимости
-        if (totalBar) totalBar.classList.add('hidden');
-        bottomNav.classList.add('hidden');
-        // Расширяем контейнер списка на весь экран
-        if (scrollContainer) scrollContainer.classList.add('full-height');
+        // Прячем элементы визуально
+        if (totalBar) totalBar.classList.add('v-hide');
+        bottomNav.classList.add('v-hide');
+        
+        // Меняем геометрию списка
+        scrollContainer.classList.add('keyboard-open');
+        
+        // Скроллим к элементу, чтобы он был по центру
+        if (element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
     } else {
-        // Возвращаем всё назад с небольшой задержкой
         setTimeout(() => {
             if (document.activeElement.tagName !== 'INPUT') {
-                if (totalBar) totalBar.classList.remove('hidden');
-                bottomNav.classList.remove('hidden');
-                if (scrollContainer) scrollContainer.classList.remove('full-height');
-                // Прокрутка вниз к последнему элементу при закрытии клавиатуры
-                if (scrollContainer) scrollContainer.scrollTo({top: scrollContainer.scrollHeight, behavior: 'smooth'});
+                if (totalBar) totalBar.classList.remove('v-hide');
+                bottomNav.classList.remove('v-hide');
+                scrollContainer.classList.remove('keyboard-open');
             }
         }, 150);
-    }
-}
-
-function dismissKeyboard(e) {
-    if (e.target.tagName !== 'INPUT') {
-        document.querySelectorAll('input').forEach(i => i.blur());
-        toggleUI(false);
     }
 }
 
@@ -48,7 +46,6 @@ function showScreen(id, el, idx) {
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
     if (idx !== undefined) moveIndicator(idx);
-    
     if (el) {
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
@@ -66,9 +63,9 @@ function createNewRow() {
     div.className = 'input-row';
     div.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name" 
-               onfocus="toggleUI(true)" onblur="toggleUI(false)">
+               onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
         <input type="number" placeholder="0" class="item-price" 
-               oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+               oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
     `;
     container.appendChild(div);
 
@@ -81,14 +78,12 @@ function createNewRow() {
                 const rows = document.querySelectorAll('.item-name');
                 const lastRow = rows[rows.length - 1];
                 lastRow.focus();
-                // Авто-скролл к новой строке
-                lastRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 50);
         }
     });
 }
 
-// Старт приложения
+// Запуск первой строки
 createNewRow();
 
 function updateTotal() {
@@ -107,7 +102,7 @@ function saveAndHome() {
 // Конвертер
 const convInput = document.getElementById('conv-input');
 if(convInput) {
-    convInput.addEventListener('focus', () => toggleUI(true));
+    convInput.addEventListener('focus', () => toggleUI(true, convInput));
     convInput.addEventListener('blur', () => toggleUI(false));
 }
 
@@ -140,6 +135,7 @@ function selectCurr(f, c) {
     convertCurrency();
 }
 
+// Данные профиля из TG
 if(tg.initDataUnsafe?.user) {
     document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
     if(tg.initDataUnsafe.user.photo_url) {
