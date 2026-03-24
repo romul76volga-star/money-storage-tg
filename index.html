@@ -10,11 +10,11 @@
 <body>
     <div id="modal-overlay" class="modal-overlay hidden">
         <div class="modal-card glass">
-            <button class="close-modal" onclick="closeSaveModal()">✕</button>
+            <button class="close-modal-btn" onclick="closeSaveModal()">✕</button>
             <div class="modal-total-label">СУММА ЗАТРАТ</div>
             <div id="modal-total-value" class="modal-total-amount">0</div>
             <div class="modal-actions">
-                <button class="confirm-btn" onclick="confirmSave()">ПОДТВЕРДИТЬ</button>
+                <button class="modal-confirm-btn" onclick="confirmSave()">ПОДТВЕРДИТЬ</button>
             </div>
         </div>
     </div>
@@ -30,11 +30,9 @@
         </section>
 
         <section id="screen-counter" class="screen">
-            <div class="scroll-container">
-                <div id="items-list"></div>
-                <div class="add-row-bar" onclick="createNewRow()">
-                    <span>+</span>
-                </div>
+            <div id="items-list" class="scroll-container"></div>
+            <div class="add-row-bar" onclick="createNewRow()">
+                <span>+</span>
             </div>
             
             <div id="total-bar" class="total-container">
@@ -44,14 +42,26 @@
         </section>
 
         <section id="screen-converter" class="screen">
-            <div class="center-content">
-                <div class="currency-row-simple">
-                    <span>USD</span>
-                    <img src="assets/swap.png" class="swap-icon-simple">
-                    <span>RUB</span>
+            <div class="converter-wrap">
+                <input type="number" id="conv-input" value="100" oninput="convertCurrency()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+                <div class="currency-row">
+                    <div class="curr-select glass-border" onclick="openPicker('from')">
+                        <div id="from-flag">🇷🇺</div><div id="from-code">RUB</div>
+                    </div>
+                    <img src="assets/swap.png" class="swap-icon">
+                    <div class="curr-select glass-border" onclick="openPicker('to')">
+                        <div id="to-flag">🇺🇸</div><div id="to-code">USD</div>
+                    </div>
                 </div>
-                <input type="number" id="conv-input" value="100" class="big-input" onfocus="toggleUI(true)" onblur="toggleUI(false)">
-                <div id="conv-result" class="big-result">0.00</div>
+                <div id="conv-result">0.00</div>
+            </div>
+            <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
+                <div class="picker-card glass">
+                    <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
+                    <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
+                    <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
+                    <div class="p-item" onclick="selectCurr('🇰🇿','KZT')">🇰🇿 KZT</div>
+                </div>
             </div>
         </section>
 
