@@ -8,6 +8,7 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0; color: white; height: 100vh; overflow: hidden; }
 
+/* Шапка */
 .main-header {
     background: var(--dark-green); height: 80px; 
     display: flex; align-items: flex-end; justify-content: space-between;
@@ -15,28 +16,28 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 }
 #header-save { background: none; border: none; color: white; font-size: 30px; cursor: pointer; }
 
+/* Экраны */
 .screen { display: none; height: calc(100vh - 80px); position: relative; padding: 20px; }
 .screen.active { display: flex; flex-direction: column; }
 
-/* ИСПРАВЛЕНИЕ ЦЕНТРА */
-#screen-home.empty { 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-}
-#screen-home.empty .cards-grid {
+/* ЦЕНТРИРОВАНИЕ ПРИ ПУСТОМ СПИСКЕ */
+#screen-home.is-empty {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 100%;
+}
+#screen-home.is-empty .cards-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
 }
 
+/* Сетка карточек */
 .cards-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-    padding: 10px; overflow-y: auto; align-content: start; flex: 1;
+    padding: 10px; overflow-y: auto; align-content: start;
 }
-
 .save-card {
     background: var(--dark-green); border-radius: 25px; padding: 20px;
     display: flex; flex-direction: column; height: 140px; justify-content: space-between;
@@ -44,48 +45,29 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .card-date { font-size: 13px; opacity: 0.6; font-weight: 600; }
 .card-amount { font-size: 24px; font-weight: 900; }
 
-.center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.add-btn-glass {
+/* Большая круглая кнопка по центру */
+.empty-state { display: flex; flex-direction: column; align-items: center; }
+.add-btn-round {
     background: var(--glass); border: 2px solid white; border-radius: 50%;
-    width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+    width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;
 }
-.add-btn-glass img { width: 35px; height: 35px; filter: brightness(0) invert(1); }
+.add-btn-round img { width: 40px; height: 40px; filter: brightness(0) invert(1); }
 .bold-label { font-weight: 900; font-size: 20px; text-transform: lowercase; }
 
-.scroll-container { 
-    overflow-y: auto; flex: 1; margin-bottom: 170px; padding-bottom: 20px; 
-    scroll-behavior: smooth;
-}
-.scroll-container.full-height { margin-bottom: 0px !important; padding-bottom: 80vh !important; }
-
+/* Поля ввода в счетчике */
+.scroll-container { overflow-y: auto; flex: 1; margin-bottom: 170px; padding-bottom: 20px; }
 .input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
-.item-name { flex: 1; background: white; border: none; border-radius: 18px; padding: 18px 90px 18px 20px; font-size: 16px; color: #333; width: 100%; }
-.item-price { position: absolute; right: 6px; width: 80px; height: calc(100% - 12px); background: var(--dark-green); color: white; border: none; border-radius: 14px; text-align: center; font-weight: 800; font-size: 16px; }
+.item-name { flex: 1; background: white; border: none; border-radius: 18px; padding: 18px 90px 18px 20px; font-size: 16px; color: #333; }
+.item-price { position: absolute; right: 6px; width: 80px; height: calc(100% - 12px); background: var(--dark-green); color: white; border: none; border-radius: 14px; text-align: center; font-weight: 800; }
 
+/* Итог */
 .total-container { 
     background: var(--yellow); color: #333; padding: 18px; border-radius: 25px; 
-    text-align: center; position: absolute; bottom: 100px; left: 15px; right: 15px; z-index: 5;
+    text-align: center; position: absolute; bottom: 100px; left: 15px; right: 15px; 
 }
 .total-box { font-size: 36px; font-weight: 900; }
 
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-    z-index: 1000; display: flex; align-items: center; justify-content: center;
-}
-.modal-card {
-    width: 80%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 40px; padding: 30px; text-align: center;
-}
-.modal-total-amount { font-size: 48px; font-weight: 900; margin-bottom: 30px; }
-.modal-actions { display: flex; justify-content: space-around; }
-.modal-btn {
-    width: 65px; height: 65px; border-radius: 50%; border: none; font-size: 24px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-}
-.modal-btn.confirm { background: var(--yellow); color: #333; }
-.modal-btn.cancel { background: none; border: 1px solid white; color: white; }
-
+/* Навигация */
 .tab-bar {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     width: 90%; height: 65px; background: rgba(0,0,0,0.4); border-radius: 40px;
@@ -95,6 +77,12 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .tab-item.active img { opacity: 1; }
 #tab-indicator { position: absolute; width: 50px; height: 50px; background: var(--glass); border-radius: 50%; left: 7.5%; transition: 0.3s; }
 
+/* Служебные классы */
 .hidden { display: none !important; }
 .v-hide { opacity: 0 !important; pointer-events: none !important; }
 .glass { backdrop-filter: blur(15px); background: var(--glass); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-card { width: 80%; padding: 30px; border-radius: 40px; text-align: center; }
+.modal-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; }
+.modal-btn.confirm { background: var(--yellow); margin-right: 15px; }
+.modal-btn.cancel { background: none; border: 1px solid white; color: white; }
