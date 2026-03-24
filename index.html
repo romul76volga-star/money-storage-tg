@@ -9,29 +9,28 @@
 </head>
 <body>
     <div id="app">
+        <div class="top-black-bar"></div>
+
         <section id="screen-home" class="screen active">
             <div id="empty-view" class="center-content">
-                <button class="add-main-btn" onclick="showScreen('screen-counter')">
+                <button class="add-main-btn" onclick="showScreen('screen-counter', document.querySelector('.tab-item:nth-child(2)'))">
                     <img src="assets/plus.png" alt="+">
                 </button>
-                <p>Добавить новый расчет</p>
+                <div class="add-text-bold">добавить</div>
             </div>
-            <div id="saved-data-view" class="hidden center-content">
-                </div>
+            <div id="saved-data-view" class="hidden center-content"></div>
         </section>
 
         <section id="screen-counter" class="screen">
             <header class="glass-header">
                 <span class="title">Счетчик</span>
-                <button class="save-check-btn" onclick="saveAndHome()">✓</button>
+                <button class="save-check-btn-transparent" onclick="saveAndHome()">✓</button>
             </header>
             <div id="items-list" class="scroll-container">
                 </div>
-            <div class="total-container glass">
+            <div class="total-container">
                 <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
-                <div class="total-box">
-                    <span id="total-value">0</span>
-                </div>
+                <div class="total-box"><span id="total-value">0</span></div>
             </div>
         </section>
 
@@ -43,21 +42,20 @@
                     <div class="select-box" onclick="openCurrencyPicker('from')">
                         <span id="from-flag">🇷🇺</span> <span id="from-code">RUB</span>
                     </div>
-                    <img src="assets/swap.png" class="swap-icon">
+                    <img src="assets/swap.png" class="swap-icon-small">
                     <div class="select-box" onclick="openCurrencyPicker('to')">
                         <span id="to-flag">🇺🇸</span> <span id="to-code">USD</span>
                     </div>
                 </div>
-                <div id="conv-result">Загрузка курса...</div>
+                <div id="conv-result">Загрузка...</div>
             </div>
             
             <div id="currency-picker" class="picker-overlay hidden" onclick="closeCurrencyPicker()">
                 <div class="picker-content glass" onclick="event.stopPropagation()">
-                    <div class="picker-item" onclick="selectCurrency('🇷🇺', 'RUB')">🇷🇺 RUB (Рубль)</div>
-                    <div class="picker-item" onclick="selectCurrency('🇺🇸', 'USD')">🇺🇸 USD (Доллар)</div>
-                    <div class="picker-item" onclick="selectCurrency('🇪🇺', 'EUR')">🇪🇺 EUR (Евро)</div>
-                    <div class="picker-item" onclick="selectCurrency('🇰🇿', 'KZT')">🇰🇿 KZT (Тенге)</div>
-                    <div class="picker-item" onclick="selectCurrency('🇹🇷', 'TRY')">🇹🇷 TRY (Лира)</div>
+                    <div class="picker-item" onclick="selectCurrency('🇷🇺', 'RUB')">🇷🇺 RUB</div>
+                    <div class="picker-item" onclick="selectCurrency('🇺🇸', 'USD')">🇺🇸 USD</div>
+                    <div class="picker-item" onclick="selectCurrency('🇪🇺', 'EUR')">🇪🇺 EUR</div>
+                    <div class="picker-item" onclick="selectCurrency('🇰🇿', 'KZT')">🇰🇿 KZT</div>
                 </div>
             </div>
         </section>
@@ -67,24 +65,24 @@
             <div class="profile-card glass">
                 <div id="user-avatar" class="avatar-circle"></div>
                 <div class="user-info">
-                    <h2 id="user-name">Загрузка...</h2>
-                    <p id="user-id">Standard Plan</p>
+                    <h2 id="user-name">Пользователь</h2>
+                    <p>Standard Plan</p>
                 </div>
             </div>
             <div class="settings-list glass">
-                <div class="settings-item">Версия: 1.0.0</div>
-                <div class="settings-item" onclick="localStorage.clear(); location.reload();">Сбросить всё</div>
+                <div class="settings-item" onclick="localStorage.clear(); location.reload();">Сбросить данные</div>
             </div>
         </section>
 
-        <nav class="tab-bar glass">
-            <div class="tab-item active" onclick="showScreen('screen-home', this)">
+        <nav class="tab-bar">
+            <div id="tab-indicator"></div>
+            <div class="tab-item active" onclick="moveIndicator(0); showScreen('screen-home', this)">
                 <img src="assets/home.png">
             </div>
-            <div class="tab-item" onclick="showScreen('screen-converter', this)">
+            <div class="tab-item" onclick="moveIndicator(1); showScreen('screen-converter', this)">
                 <img src="assets/dollar.png">
             </div>
-            <div class="tab-item" onclick="showScreen('screen-settings', this)">
+            <div class="tab-item" onclick="moveIndicator(2); showScreen('screen-settings', this)">
                 <img src="assets/gear.png">
             </div>
         </nav>
