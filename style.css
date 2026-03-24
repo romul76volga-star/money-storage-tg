@@ -14,47 +14,93 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
     display: flex; align-items: flex-end; justify-content: space-between;
     padding: 0 20px 15px 20px; font-size: 24px; font-weight: 800;
 }
-#header-save { background: none; border: none; color: white; font-size: 30px; }
+#header-save { background: none; border: none; color: white; font-size: 30px; cursor: pointer; }
 
 /* Экраны */
-.screen { display: none; height: calc(100vh - 80px); position: relative; }
+.screen { display: none; height: calc(100vh - 80px); position: relative; padding: 20px; }
 .screen.active { display: flex; flex-direction: column; }
 
 /* Главная */
 .center-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .add-btn-glass {
     background: var(--glass); border: 2px solid white; border-radius: 50%;
-    width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+    width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
 }
-.add-btn-glass img { width: 30px; filter: brightness(0) invert(1); }
-.bold-label { font-weight: 800; font-size: 18px; }
+.add-btn-glass img, .white-icon { filter: brightness(0) invert(1); width: 35px; }
+.bold-label { font-weight: 900; font-size: 20px; }
 
-/* Счетчик (СТРОГО ВО ВЕСЬ ЭКРАН) */
-#screen-counter { padding: 0; }
-.input-row { display: flex; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.item-name { flex: 2; background: white; border: none; padding: 20px; font-size: 16px; color: #333; border-radius: 0; }
-.item-price { flex: 1; background: var(--dark-green); border: none; padding: 20px; color: white; font-weight: bold; text-align: center; border-radius: 0; }
+/* Счетчик: строки как на примере */
+#screen-counter { padding: 15px 10px; }
+.scroll-container { overflow-y: auto; flex: 1; margin-bottom: 170px; }
 
-/* Желтый итог (ВЫШЕ МЕНЮ) */
+.input-row { 
+    display: flex; 
+    width: 100%; 
+    margin-bottom: 12px; 
+    position: relative; 
+    align-items: center;
+}
+
+.item-name { 
+    flex: 1; 
+    background: white; 
+    border: none; 
+    border-radius: 18px; 
+    padding: 18px 90px 18px 20px; 
+    font-size: 16px; 
+    color: #333; 
+    width: 100%;
+}
+
+.item-price { 
+    position: absolute; 
+    right: 6px; 
+    width: 80px; 
+    height: calc(100% - 12px); 
+    background: var(--dark-green); 
+    color: white; 
+    border: none; 
+    border-radius: 14px; 
+    text-align: center; 
+    font-weight: 800; 
+    font-size: 16px; 
+}
+
+/* Желтый итог: скруглен полностью и поднят */
 .total-container { 
-    background: var(--yellow); color: #333; padding: 15px; 
-    border-radius: 20px 20px 0 0; text-align: center;
-    position: absolute; bottom: 85px; width: 100%; z-index: 5;
+    background: var(--yellow); 
+    color: #333; 
+    padding: 18px; 
+    border-radius: 25px; 
+    text-align: center;
+    position: absolute; 
+    bottom: 100px; 
+    left: 15px;
+    right: 15px;
+    z-index: 5;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
-.total-label { font-size: 10px; font-weight: 800; }
-.total-box { font-size: 32px; font-weight: 900; }
+.total-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+.total-box { font-size: 36px; font-weight: 900; }
 
-/* Конвертер (ПО ТВОЕМУ РИСУНКУ) */
-.converter-wrap { padding: 20px; text-align: center; }
-.converter-wrap input { width: 100%; background: none; border: none; color: white; font-size: 45px; text-align: center; font-weight: bold; margin-bottom: 20px; }
-.currency-row { display: flex; justify-content: space-around; align-items: center; margin-top: 20px; }
+/* Конвертер */
+.converter-wrap { text-align: center; margin-top: 30px; }
+.converter-wrap input { width: 100%; background: none; border: none; color: white; font-size: 50px; text-align: center; font-weight: bold; }
+.currency-row { display: flex; justify-content: space-around; align-items: center; margin: 30px 0; }
 .curr-select { 
-    background: var(--glass); border: 1px solid rgba(255,255,255,0.3); 
-    border-radius: 12px; padding: 10px; min-width: 100px; 
-    display: flex; flex-direction: column; align-items: center;
+    font-size: 18px; 
+    padding: 12px; 
+    background: var(--glass); 
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 15px; 
+    min-width: 100px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-.curr-select span:first-child { font-size: 24px; margin-bottom: 4px; } /* Флаг сверху */
-.swap-icon { width: 25px; filter: brightness(0) invert(1); }
+.curr-top-flag { font-size: 26px; margin-bottom: 5px; }
+.swap-icon { width: 25px; filter: brightness(0) invert(1); opacity: 0.8; }
+#conv-result { font-size: 32px; opacity: 0.9; font-weight: bold; }
 
 /* Меню */
 .tab-bar {
@@ -62,12 +108,8 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
     width: 90%; height: 65px; background: rgba(0,0,0,0.4); border-radius: 40px;
     display: flex; justify-content: space-around; align-items: center; z-index: 10;
 }
-.tab-item img { width: 24px; filter: brightness(0) invert(1); opacity: 0.5; transition: 0.3s; z-index: 12; }
+.tab-item img { width: 26px; filter: brightness(0) invert(1); opacity: 0.5; transition: 0.3s; z-index: 15; }
 .tab-item.active img { opacity: 1; }
-#tab-indicator { 
-    position: absolute; width: 50px; height: 50px; background: var(--glass); 
-    border-radius: 50%; left: 7.5%; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-}
+#tab-indicator { position: absolute; width: 50px; height: 50px; background: var(--glass); border-radius: 50%; left: 7.5%; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
 .hidden { display: none !important; }
-.scroll-container { overflow-y: auto; flex: 1; margin-bottom: 160px; } /* Отступ для итога */
