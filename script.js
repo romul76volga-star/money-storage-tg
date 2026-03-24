@@ -1,7 +1,43 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// ТВОЯ ФУНКЦИЯ toggleUI (без изменений)
+// 1. ЗАКРЫТИЕ КЛАВИАТУРЫ ПО ТАПУ НА ЭКРАН
+document.addEventListener('click', (e) => {
+    // Если кликнули не по input, убираем фокус (скрываем клавиатуру)
+    if (e.target.tagName !== 'INPUT') {
+        document.activeElement.blur();
+    }
+});
+
+// НАВИГАЦИЯ
+function showScreen(id, el, idx) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    
+    const titles = { 
+        'screen-home': 'Главная', 
+        'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 
+        'screen-settings': 'Профиль' 
+    };
+    
+    document.getElementById('header-title').innerText = titles[id];
+    document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
+
+    if (idx !== undefined) {
+        const pos = ['7.5%', '41%', '74.5%'];
+        document.getElementById('tab-indicator').style.left = pos[idx];
+    }
+    if (el) {
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+    
+    // При переключении на главную — обновляем карточки
+    if (id === 'screen-home') renderCards();
+}
+
+// УПРАВЛЕНИЕ UI (Клавиатура и отступы)
 function toggleUI(isFocused, element = null) {
     const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
@@ -11,6 +47,7 @@ function toggleUI(isFocused, element = null) {
         if (totalBar) totalBar.classList.add('v-hide');
         bottomNav.classList.add('v-hide');
         if (scrollContainer) scrollContainer.classList.add('full-height');
+        
         if (element) {
             setTimeout(() => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -27,35 +64,21 @@ function toggleUI(isFocused, element = null) {
     }
 }
 
-// НАВИГАЦИЯ
-function showScreen(id, el, idx) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
-    document.getElementById('header-title').innerText = titles[id];
-    document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
-
-    if (idx !== undefined) {
-        const pos = ['7.5%', '41%', '74.5%'];
-        document.getElementById('tab-indicator').style.left = pos[idx];
-    }
-    if (el) {
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-    }
-}
-
-// ТВОЯ ФУНКЦИЯ createNewRow
+// СОЗДАНИЕ СТРОКИ (Исправлен баг с 5-й строкой)
 function createNewRow() {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
+        <input type="number" inputmode="decimal" placeholder="0" class="item-price" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
     `;
     container.appendChild(div);
+
+    // Авто-прокрутка к новой строке (решает проблему доступности 5+ строк)
+    setTimeout(() => {
+        div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
 
     const priceInput = div.querySelector('.item-price');
     priceInput.addEventListener('keydown', (e) => {
@@ -63,9 +86,9 @@ function createNewRow() {
             e.preventDefault();
             createNewRow();
             setTimeout(() => {
-                const rows = document.querySelectorAll('.item-name');
-                rows[rows.length - 1].focus();
-            }, 50);
+                const names = document.querySelectorAll('.item-name');
+                names[names.length - 1].focus();
+            }, 100);
         }
     });
 }
@@ -76,18 +99,12 @@ function updateTotal() {
     document.getElementById('total-value').innerText = t;
 }
 
-// СОХРАНЕНИЕ
+// СОХРАНЕНИЕ И МОДАЛКА
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     if (total === "0") return;
     document.getElementById('modal-total-value').innerText = total;
     document.getElementById('modal-overlay').classList.remove('hidden');
-}
-
-function cancelSave() {
-    document.getElementById('modal-overlay').classList.add('hidden');
-    clearCounter();
-    showScreen('screen-home', document.querySelector('.tab-item'), 0);
 }
 
 function confirmSave() {
@@ -113,8 +130,15 @@ function confirmSave() {
     tg.HapticFeedback.notificationOccurred('success');
     document.getElementById('modal-overlay').classList.add('hidden');
     clearCounter();
-    renderCards();
     showScreen('screen-home', document.querySelector('.tab-item'), 0);
+}
+
+function cancelSave() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+    if(confirm("Очистить текущий счетчик?")) {
+        clearCounter();
+        showScreen('screen-home', document.querySelector('.tab-item'), 0);
+    }
 }
 
 function clearCounter() {
@@ -123,19 +147,26 @@ function clearCounter() {
     createNewRow();
 }
 
-// ОТРИСОВКА КАРТОЧЕК (с удалением)
+// ОТРИСОВКА КАРТОЧЕК (Кнопка "добавить" строго по центру)
 function renderCards() {
     const container = document.getElementById('cards-container');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
     container.innerHTML = '';
 
     if (history.length === 0) {
+        // Если записей нет — показываем огромную кнопку по центру
+        container.classList.remove('cards-grid');
         container.innerHTML = `
-            <div class="center-content">
-                <button class="add-btn-glass" onclick="showScreen('screen-counter')"><img src="assets/plus.png"></button>
-                <div class="bold-label">добавить</div>
+            <div class="center-content-wrapper">
+                <div class="center-content">
+                    <button class="add-btn-glass" onclick="showScreen('screen-counter')">
+                        <img src="assets/plus.png">
+                    </button>
+                    <div class="bold-label">добавить</div>
+                </div>
             </div>`;
     } else {
+        container.classList.add('cards-grid');
         [...history].reverse().forEach((data, index) => {
             const card = document.createElement('div');
             card.className = 'save-card';
@@ -148,11 +179,9 @@ function renderCards() {
             container.appendChild(card);
         });
 
+        // Кнопка "+" в конце списка
         const addBtn = document.createElement('div');
-        addBtn.className = 'save-card';
-        addBtn.style.background = 'var(--glass)';
-        addBtn.style.border = '2px dashed white';
-        addBtn.style.alignItems = 'center'; addBtn.style.justifyContent = 'center';
+        addBtn.className = 'save-card glass dashed';
         addBtn.innerHTML = '<span style="font-size:40px">+</span>';
         addBtn.onclick = () => { clearCounter(); showScreen('screen-counter'); };
         container.appendChild(addBtn);
@@ -160,7 +189,7 @@ function renderCards() {
 }
 
 function deleteCard(event, index) {
-    event.stopPropagation(); // Чтобы при удалении не открывалась карточка
+    event.stopPropagation();
     if(confirm("Удалить эту запись?")) {
         let history = JSON.parse(localStorage.getItem('money_history') || '[]');
         history.splice(index, 1);
@@ -169,7 +198,6 @@ function deleteCard(event, index) {
     }
 }
 
-// ТВОЯ ФУНКЦИЯ loadSavedData
 function loadSavedData(data) {
     document.getElementById('items-list').innerHTML = '';
     data.items.forEach(item => {
@@ -185,7 +213,7 @@ function loadSavedData(data) {
     showScreen('screen-counter');
 }
 
-// КОНВЕРТЕР (без изменений)
+// КОНВЕРТЕР
 async function convertCurrency() {
     const val = document.getElementById('conv-input').value;
     const f = document.getElementById('from-code').innerText;
@@ -198,19 +226,9 @@ async function convertCurrency() {
     } catch { document.getElementById('conv-result').innerText = "0.00"; }
 }
 
-function openPicker(side) { window.pickingSide = side; document.getElementById('picker').classList.remove('hidden'); }
-function closePicker() { document.getElementById('picker').classList.add('hidden'); }
-function selectCurr(f, c) {
-    const side = window.pickingSide;
-    document.getElementById(`${side}-flag`).innerText = f;
-    document.getElementById(`${side}-code`).innerText = c;
-    closePicker(); convertCurrency();
-}
-
-// СТАРТ
+// Инициализация
 createNewRow();
 renderCards();
 if(tg.initDataUnsafe?.user) {
     document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
 }
-function clearData() { if(confirm("Очистить всю историю?")) { localStorage.clear(); location.reload(); } }
