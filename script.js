@@ -1,12 +1,13 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Закрытие клавиатуры
+// Закрытие клавиатуры тапом по фону
 document.addEventListener('touchstart', (e) => {
-    if (e.target.tagName !== 'INPUT') document.activeElement.blur();
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        document.activeElement.blur();
+    }
 });
 
-// НАВИГАЦИЯ
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -22,7 +23,7 @@ function showScreen(id, el, idx) {
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
     if (idx !== undefined) {
-        const pos = ['7.5%', '41%', '74.5%'];
+        const pos = ['8%', '41%', '74%'];
         document.getElementById('tab-indicator').style.left = pos[idx];
     }
     
@@ -33,7 +34,6 @@ function showScreen(id, el, idx) {
     if (id === 'screen-home') renderCards();
 }
 
-// СЧЕТЧИК
 function createNewRow(name = '', price = '') {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
@@ -43,7 +43,6 @@ function createNewRow(name = '', price = '') {
         <input type="number" placeholder="0" class="item-price" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
     `;
     container.appendChild(div);
-    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function updateTotal() {
@@ -62,11 +61,10 @@ function toggleUI(focused) {
         setTimeout(() => {
             nav.classList.remove('v-hide');
             total.classList.remove('on-keyboard');
-        }, 100);
+        }, 150);
     }
 }
 
-// МОДАЛЬНОЕ ОКНО
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     if (total === "0") return;
@@ -95,19 +93,26 @@ function clearCounter() {
     createNewRow();
 }
 
-// ГЛАВНАЯ (КАРТОЧКИ)
 function renderCards() {
     const container = document.getElementById('cards-container');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
     container.innerHTML = '';
-    history.reverse().forEach(data => {
-        const card = document.createElement('div');
-        card.className = 'save-card';
-        card.innerHTML = `<div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
-        container.appendChild(card);
-    });
+
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div class="center-content">
+                <div class="add-btn-glass" onclick="showScreen('screen-counter')"><span>+</span></div>
+                <div class="bold-label">добавить</div>
+            </div>`;
+    } else {
+        [...history].reverse().forEach(data => {
+            const card = document.createElement('div');
+            card.className = 'save-card';
+            card.innerHTML = `<div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
+            container.appendChild(card);
+        });
+    }
 }
 
-// Инициализация
 createNewRow();
 renderCards();
