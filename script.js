@@ -3,20 +3,12 @@ tg.expand();
 
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
-let exchangeRates = {};
 
-// ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    const titles = { 
-        'screen-home': 'Главная', 
-        'screen-counter': 'Счетчик', 
-        'screen-converter': 'Конвертер', 
-        'screen-settings': 'Профиль' 
-    };
-    
+    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
@@ -31,7 +23,6 @@ function showScreen(id, el, idx) {
     if (id === 'screen-home') renderCards();
 }
 
-// ЛОГИКА СЧЕТЧИКА
 function openFile(index) {
     currentEditingIndex = index;
     const list = document.getElementById('items-list');
@@ -93,6 +84,7 @@ function renderCards() {
     const container = document.getElementById('cards-container');
     if (!container) return;
     container.innerHTML = '';
+    
     const addCard = document.createElement('div');
     addCard.className = 'history-card';
     addCard.style.border = '2px dashed rgba(255,255,255,0.3)';
@@ -124,50 +116,7 @@ function deleteCard(idx, e) {
     });
 }
 
-// ЛОГИКА КОНВЕРТЕРА
-async function fetchRates() {
-    const rateDisplay = document.getElementById('current-rate-display');
-    const timeDisplay = document.getElementById('rate-update-time');
-    try {
-        rateDisplay.innerText = "обновление...";
-        const response = await fetch(`https://open.er-api.com/v6/latest/USD`);
-        const data = await response.json();
-        if (data && data.result === "success") {
-            exchangeRates = data.rates;
-            timeDisplay.innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
-            convertCurrency();
-        }
-    } catch (error) {
-        rateDisplay.innerText = "Ошибка сети";
-    }
-}
-
-function convertCurrency() {
-    const fromAmt = parseFloat(document.getElementById('from-amount').value);
-    const fromCur = document.getElementById('from-currency').value;
-    const toCur = document.getElementById('to-currency').value;
-    const toInput = document.getElementById('to-amount');
-    const rateDisplay = document.getElementById('current-rate-display');
-
-    if (!exchangeRates[fromCur] || isNaN(fromAmt)) return;
-
-    const res = (fromAmt / exchangeRates[fromCur]) * exchangeRates[toCur];
-    toInput.value = res.toFixed(2);
-    
-    const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
-    rateDisplay.innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
-}
-
-function swapCurrencies() {
-    const from = document.getElementById('from-currency');
-    const to = document.getElementById('to-currency');
-    const temp = from.value;
-    from.value = to.value;
-    to.value = temp;
-    convertCurrency();
-}
-
-// ИНТЕРФЕЙС
+// СКРЫТИЕ ПЛАШЕК ПРИ КЛАВИАТУРЕ
 function toggleUI(focused) {
     const nav = document.getElementById('bottom-nav');
     const controls = document.getElementById('counter-controls');
@@ -175,6 +124,7 @@ function toggleUI(focused) {
         nav.style.display = 'none';
         if (controls) controls.style.display = 'none';
     } else {
+        // Задержка, чтобы элементы не прыгали раньше времени
         setTimeout(() => {
             nav.style.display = 'flex';
             if (controls) controls.style.display = 'block';
@@ -192,8 +142,122 @@ function clearData() {
     });
 }
 
-// СТАРТ
-window.onload = () => {
+renderCards();
+// --- ЛОГИКА КОНВЕРТЕРА ВАЛЮТ ---
+
+// Переменная для хранения загруженных курсов
+let exchangeRates = {};
+
+// Базовая валюта API (обычно USD)
+const apiBaseCurrency = 'USD';
+
+// Функция получения актуальных курсов валют через API
+async function fetchRates() {
+    const rateDisplay = document.getElementById('current-rate-display');
+    const timeDisplay = document.getElementById('rate-update-time');
+    const updateBtn = document.querySelector('.update-rates-btn');
+
+    try {
+        // Пока идет загрузка, меняем текст
+        rateDisplay.innerText = "updating...";
+        updateBtn.disabled = true; // Отключаем кнопку
+
+        // Используем бесплатный API er-api.com
+        const response = await fetch(`https://open.er-api.com/v6/latest/${apiBaseCurrency}`);
+        const data = await response.json();
+
+        if (data && data.result === "success") {
+            exchangeRates = data.rates;
+            
+            // Обновляем UI с временем последнего обновления
+            const now = new Date();
+            timeDisplay.innerText = `Updated at: ${now.toLocaleTimeString()}`;
+            
+            // Выполняем первую конвертацию
+            convertCurrency();
+        } else {
+            throw new Error("Failed to load rates");
+        }
+    } catch (error) {
+        console.error("Currency API Error:", error);
+        rateDisplay.innerText = "Error loading rates";
+        timeDisplay.innerText = "Check your internet connection";
+    } finally {
+        // В любом случае возвращаем кнопку в рабочее состояние
+        updateBtn.disabled = false;
+    }
+}
+
+// Функция мгновенной конвертации при вводе
+function convertCurrency() {
+    const fromAmountInput = document.getElementById('from-amount');
+    const fromCurrencySelect = document.getElementById('from-currency');
+    const toAmountInput = document.getElementById('to-amount');
+    const toCurrencySelect = document.getElementById('to-currency');
+    const rateDisplay = document.getElementById('current-rate-display');
+
+    // Если курсы еще не загружены, ничего не делаем
+    if (Object.keys(exchangeRates).length === 0) return;
+
+    const fromCurrency = fromCurrencySelect.value;
+    const toCurrency = toCurrencySelect.value;
+    const amount = parseFloat(fromAmountInput.value);
+
+    // Обработка пустых или некорректных вводов
+    if (isNaN(amount) || amount < 0) {
+        toAmountInput.value = "";
+        rateDisplay.innerText = "---";
+        return;
+    }
+
+    // Если валюты одинаковые, результат равен вводу
+    if (fromCurrency === toCurrency) {
+        toAmountInput.value = amount;
+        rateDisplay.innerText = `1 ${fromCurrency} = 1 ${toCurrency}`;
+        return;
+    }
+
+    // Расчет через кросс-курс (оба курса к базовой валюте API, USD)
+    // Formula: (Amount / RateFrom) * RateTo
+    const amountInBase = amount / exchangeRates[fromCurrency];
+    const convertedAmount = amountInBase * exchangeRates[toCurrency];
+
+    // Вывод результата с округлением до 2 знаков
+    toAmountInput.value = convertedAmount.toFixed(2);
+
+    // Обновляем текст текущего курса для этой пары
+    const oneUnitRate = (1 / exchangeRates[fromCurrency]) * exchangeRates[toCurrency];
+    rateDisplay.innerText = `1 ${fromCurrency} = ${oneUnitRate.toFixed(4)} ${toCurrency}`;
+}
+
+// Функция смены валют местами (⇄)
+function swapCurrencies() {
+    const fromCurrencySelect = document.getElementById('from-currency');
+    const toCurrencySelect = document.getElementById('to-currency');
+    const fromAmountInput = document.getElementById('from-amount');
+    const toAmountInput = document.getElementById('to-amount');
+
+    // Меняем местами выбранные валюты
+    const tempCurrency = fromCurrencySelect.value;
+    fromCurrencySelect.value = toCurrencySelect.value;
+    toCurrencySelect.value = tempCurrency;
+
+    // Опционально: можно поменять местами и суммы, но лучше оставить ввод сверху
+    if (toAmountInput.value) {
+        fromAmountInput.value = toAmountInput.value;
+    }
+
+    // Запускаем пересчет
+    convertCurrency();
+}
+
+// Добавим вызов fetchRates() при инициализации приложения
+// Убедись, что это выполняется после загрузки DOM
+window.addEventListener('load', () => {
+    // Твой существующий код старта приложения...
     renderCards();
+    createNewRow();
+
+    // Загружаем курсы валют
     fetchRates();
-};
+});
