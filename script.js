@@ -1,26 +1,32 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// Загрузка данных из памяти
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 
+// Функция переключения экранов
 function showScreen(id, el, idx) {
-    // Скрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    // Обновляем заголовок
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
+    // Заголовок
+    const titles = { 
+        'screen-home': 'Главная', 
+        'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 
+        'screen-settings': 'Профиль' 
+    };
     document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
     
-    // Показываем галочку только в счетчике
+    // Показ/скрытие кнопки сохранения
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
-    // Управление индикатором (кружком) в меню
-    if (idx !== undefined) {
-        const positions = ['16.5%', '50%', '83.5%'];
-        const indicator = document.getElementById('tab-indicator');
-        indicator.style.left = positions[idx];
+    // Движение кружка в меню (фиксированный размер иконок)
+    const indicator = document.getElementById('tab-indicator');
+    if (idx !== undefined && indicator) {
+        const pos = (idx * 33.33) + 16.66;
+        indicator.style.left = `${pos}%`;
         indicator.style.transform = 'translateX(-50%)';
         
         document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
@@ -30,6 +36,7 @@ function showScreen(id, el, idx) {
     if (id === 'screen-home') renderCards();
 }
 
+// Открытие файла (папки)
 function openFile(index) {
     currentEditingIndex = index;
     const list = document.getElementById('items-list');
@@ -45,10 +52,11 @@ function openFile(index) {
         });
         updateTotal();
     }
-    // Переходим в счетчик, но кружок в меню остается на "Главной" (индекс 0)
+    // Переходим в счетчик, сохраняя фокус меню на главной
     showScreen('screen-counter', null, 0);
 }
 
+// Создание строки ввода
 function createRowElement(name = '', price = '') {
     const row = document.createElement('div');
     row.className = 'input-row';
@@ -62,16 +70,20 @@ function createRowElement(name = '', price = '') {
 function createNewRow() {
     const list = document.getElementById('items-list');
     list.appendChild(createRowElement());
-    // Скролл к новой строке
+    // Авто-скролл к новой строке
     setTimeout(() => list.scrollTo({top: list.scrollHeight, behavior: 'smooth'}), 100);
 }
 
+// Подсчет суммы
 function updateTotal() {
     let total = 0;
-    document.querySelectorAll('.item-price').forEach(i => total += Number(i.value) || 0);
+    document.querySelectorAll('.item-price').forEach(i => {
+        total += Number(i.value) || 0;
+    });
     document.getElementById('total-value').innerText = total;
 }
 
+// Сохранение
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     const items = [];
@@ -83,8 +95,9 @@ function saveAndHome() {
 
     if (items.length > 0) {
         const record = { 
-            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU') : savedRecords[currentEditingIndex].date, 
-            total, items 
+            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, 
+            total, 
+            items 
         };
         if (currentEditingIndex === -1) savedRecords.unshift(record);
         else savedRecords[currentEditingIndex] = record;
@@ -94,15 +107,18 @@ function saveAndHome() {
     }
 }
 
+// Отрисовка квадратных папок на главной
 function renderCards() {
     const container = document.getElementById('cards-container');
+    if (!container) return;
     container.innerHTML = '';
     
-    // Кнопка "+" для создания нового файла (тоже квадратная)
+    // Кнопка "+"
     const addCard = document.createElement('div');
-    addCard.className = 'history-card add-card-style';
+    addCard.className = 'history-card';
+    addCard.style.border = '2px dashed rgba(255,255,255,0.3)';
     addCard.onclick = () => openFile(-1);
-    addCard.innerHTML = `<span>+</span>`;
+    addCard.innerHTML = `<span style="font-size: 40px; font-weight: 200;">+</span>`;
     container.appendChild(addCard);
 
     savedRecords.forEach((rec, index) => {
@@ -110,9 +126,9 @@ function renderCards() {
         card.className = 'history-card';
         card.onclick = () => openFile(index);
         card.innerHTML = `
+            <button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
             <div class="card-date">${rec.date}</div>
             <div class="card-sum">${rec.total} ₽</div>
-            <button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
         `;
         container.appendChild(card);
     });
@@ -129,10 +145,11 @@ function deleteCard(idx, e) {
     });
 }
 
+// Скрытие меню при клавиатуре
 function toggleUI(focused) {
     const nav = document.getElementById('bottom-nav');
-    if (focused) nav.classList.add('ui-hidden');
-    else setTimeout(() => nav.classList.remove('ui-hidden'), 200);
+    if (focused) nav.style.display = 'none';
+    else setTimeout(() => nav.style.display = 'flex', 200);
 }
 
 function handleGlobalClick(e) {
@@ -140,7 +157,7 @@ function handleGlobalClick(e) {
 }
 
 function clearData() {
-    tg.showConfirm("Вы уверены, что хотите удалить ВСЕ данные?", (ok) => {
+    tg.showConfirm("Удалить ВСЕ данные?", (ok) => {
         if(ok) {
             localStorage.clear();
             savedRecords = [];
@@ -150,5 +167,5 @@ function clearData() {
     });
 }
 
-// Инициализация
+// Старт приложения
 renderCards();
