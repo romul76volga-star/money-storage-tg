@@ -1,123 +1,115 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-tg.ready();
 
-// 1. Плавный индикатор меню
-function moveIndicator(index) {
-    const indicator = document.getElementById('tab-indicator');
-    const positions = ['7.5%', '41%', '74.5%']; // Координаты для прыжка кружка
-    indicator.style.left = positions[index];
-}
+let currentFocus = false;
 
-// 2. Переключение экранов
-function showScreen(screenId, el) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
-    
-    if(el) {
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        // Автоматически двигаем индикатор при смене экрана
-        const index = Array.from(el.parentNode.children).indexOf(el) - 1; // -1 из-за индикатора
-        if(index >= 0) moveIndicator(index);
+// Прятать клавиатуру по тапу на пустое место
+function dismissKeyboard(e) {
+    if (e.target.tagName !== 'INPUT') {
+        document.querySelectorAll('input').forEach(i => i.blur());
+        setFocus(false);
     }
 }
 
-// 3. Создание строк (одна за другой)
+// Режим фокуса: прячем итог и меню при вводе
+function setFocus(state) {
+    currentFocus = state;
+    const nav = document.getElementById('bottom-nav');
+    const total = document.getElementById('total-bar');
+    
+    if (state) {
+        nav.style.opacity = '0';
+        setTimeout(() => nav.classList.add('hidden'), 300);
+        if (total) total.classList.add('hidden');
+    } else {
+        nav.classList.remove('hidden');
+        setTimeout(() => nav.style.opacity = '1', 10);
+        if (total) total.classList.remove('hidden');
+    }
+}
+
+function showScreen(id, el, idx) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    
+    // Заголовок
+    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
+    document.getElementById('header-title').innerText = titles[id];
+    
+    // Галочка (только в счетчике)
+    document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
+
+    if (idx !== undefined) moveIndicator(idx);
+    if (el) {
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+}
+
+function moveIndicator(idx) {
+    const pos = ['7.5%', '41%', '74.5%'];
+    document.getElementById('tab-indicator').style.left = pos[idx];
+}
+
 function createNewRow() {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name">
-        <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()">
+        <input type="text" placeholder="товар..." class="item-name" onfocus="setFocus(true)" onblur="setFocus(false)">
+        <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()" onfocus="setFocus(true)" onblur="setFocus(false)">
     `;
     container.appendChild(div);
 
-    const priceInput = div.querySelector('.item-price');
-    priceInput.addEventListener('keydown', (e) => {
+    div.querySelector('.item-price').addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             e.preventDefault();
             createNewRow();
             setTimeout(() => {
-                const names = document.querySelectorAll('.item-name');
-                names[names.length - 1].focus();
-            }, 10);
+                const rows = document.querySelectorAll('.item-name');
+                rows[rows.length - 1].focus();
+            }, 50);
         }
     });
 }
 
-// Запуск первой строки
-if(document.getElementById('items-list')) createNewRow();
+createNewRow();
 
-// 4. Подсчет итога
 function updateTotal() {
-    let total = 0;
-    document.querySelectorAll('.item-price').forEach(input => {
-        total += Number(input.value) || 0;
-    });
-    document.getElementById('total-value').innerText = total;
+    let t = 0;
+    document.querySelectorAll('.item-price').forEach(i => t += Number(i.value) || 0);
+    document.getElementById('total-value').innerText = t;
 }
 
-// 5. Конвертер
+// Конвертер
 async function convertCurrency() {
-    const amt = document.getElementById('conv-input').value;
-    const from = document.getElementById('from-code').innerText;
-    const to = document.getElementById('to-code').innerText;
-    if(!amt) return;
+    const val = document.getElementById('conv-input').value;
+    const f = document.getElementById('from-code').innerText;
+    const t = document.getElementById('to-code').innerText;
+    if(!val) return;
     try {
-        const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
-        const data = await res.json();
-        const result = (amt * data.rates[to]).toFixed(2);
-        document.getElementById('conv-result').innerText = `≈ ${result} ${to}`;
-    } catch {
-        document.getElementById('conv-result').innerText = "Ошибка курса";
-    }
+        const r = await fetch(`https://api.exchangerate-api.com/v4/latest/${f}`);
+        const d = await r.json();
+        document.getElementById('conv-result').innerText = (val * d.rates[t]).toFixed(2);
+    } catch { document.getElementById('conv-result').innerText = "error"; }
 }
 
-let pickingSide = 'from';
-function openCurrencyPicker(side) { pickingSide = side; document.getElementById('currency-picker').classList.remove('hidden'); }
-function closeCurrencyPicker() { document.getElementById('currency-picker').classList.add('hidden'); }
-function selectCurrency(flag, code) {
-    document.getElementById(`${pickingSide}-flag`).innerText = flag;
-    document.getElementById(`${pickingSide}-code`).innerText = code;
-    closeCurrencyPicker();
+function openPicker(side) { 
+    window.pickingSide = side; 
+    document.getElementById('picker').classList.remove('hidden'); 
+}
+function closePicker() { document.getElementById('picker').classList.add('hidden'); }
+function selectCurr(f, c) {
+    document.getElementById(`${window.pickingSide}-flag`).innerText = f;
+    document.getElementById(`${window.pickingSide}-code`).innerText = c;
+    closePicker();
     convertCurrency();
 }
 
-// 6. Сохранение
-function saveAndHome() {
-    const total = document.getElementById('total-value').innerText;
-    if(total === "0") return tg.showAlert("Сначала введите сумму!");
-    localStorage.setItem('saved_money', total);
-    tg.HapticFeedback.notificationOccurred('success');
-    renderHome();
-    showScreen('screen-home', document.querySelector('.tab-item:first-child'));
-    moveIndicator(0);
-}
-
-function renderHome() {
-    const saved = localStorage.getItem('saved_money');
-    const view = document.getElementById('saved-data-view');
-    const empty = document.getElementById('empty-view');
-    if(saved) {
-        empty.classList.add('hidden');
-        view.classList.remove('hidden');
-        view.innerHTML = `<div class="glass" style="padding:40px; text-align:center;">
-            <p style="opacity:0.6">Последний итог:</p>
-            <h1 style="font-size:45px; margin:10px 0;">${saved} ₽</h1>
-            <button onclick="localStorage.clear(); location.reload();" style="background:none; border:1px solid white; color:white; padding:10px; border-radius:10px;">Сбросить</button>
-        </div>`;
-    }
-}
-
-// Данные пользователя Telegram
+// Telegram данные
 if(tg.initDataUnsafe?.user) {
     document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
-    if(tg.initDataUnsafe.user.photo_url) {
-        document.getElementById('user-avatar').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
-    }
+    if(tg.initDataUnsafe.user.photo_url) document.getElementById('user-avatar').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
 }
 
-renderHome();
-convertCurrency();
+function clearData() { localStorage.clear(); location.reload(); }
