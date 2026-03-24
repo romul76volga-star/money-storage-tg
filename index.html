@@ -10,11 +10,11 @@
 <body>
     <div id="modal-overlay" class="modal-overlay hidden">
         <div class="modal-card glass">
-            <button class="close-modal-btn" onclick="closeSaveModal()">✕</button>
-            <div class="modal-total-label">СОХРАНИТЬ?</div>
+            <div class="modal-total-label">СУММА ЗАТРАТ</div>
             <div id="modal-total-value" class="modal-total-amount">0</div>
             <div class="modal-actions">
-                <button class="modal-btn confirm" onclick="confirmSave()">ПОДТВЕРДИТЬ</button>
+                <button class="modal-btn confirm" onclick="confirmSave()">✓</button>
+                <button class="modal-btn cancel" onclick="cancelSave()">✕</button>
             </div>
         </div>
     </div>
@@ -30,13 +30,7 @@
         </section>
 
         <section id="screen-counter" class="screen">
-            <div class="scroll-container">
-                <div id="items-list"></div>
-                <div class="add-row-bar" onclick="createNewRow()">
-                    <span>+</span>
-                </div>
-            </div>
-            
+            <div id="items-list" class="scroll-container"></div>
             <div id="total-bar" class="total-container">
                 <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
                 <div class="total-box"><span id="total-value">0</span></div>
@@ -44,14 +38,26 @@
         </section>
 
         <section id="screen-converter" class="screen">
-            <div class="converter-wrap center-content">
-                <div class="currency-row-simple">
-                    <span>USD</span>
-                    <img src="assets/swap.png" class="swap-icon-simple">
-                    <span>RUB</span>
+            <div class="converter-wrap">
+                <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
+                <div class="currency-row">
+                    <div class="curr-select glass-border" onclick="openPicker('from')">
+                        <div id="from-flag">🇷🇺</div><div id="from-code">RUB</div>
+                    </div>
+                    <img src="assets/swap.png" class="swap-icon">
+                    <div class="curr-select glass-border" onclick="openPicker('to')">
+                        <div id="to-flag">🇺🇸</div><div id="to-code">USD</div>
+                    </div>
                 </div>
-                <input type="number" id="conv-input" value="100" class="big-input">
-                <div id="conv-result" class="big-result">0.00</div>
+                <div id="conv-result">0.00</div>
+            </div>
+            <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
+                <div class="picker-card glass">
+                    <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
+                    <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
+                    <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
+                    <div class="p-item" onclick="selectCurr('🇰🇿','KZT')">🇰🇿 KZT</div>
+                </div>
             </div>
         </section>
 
@@ -69,15 +75,9 @@
 
     <nav id="bottom-nav" class="tab-bar">
         <div id="tab-indicator"></div>
-        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">
-            <img src="assets/home.png">
-        </div>
-        <div class="tab-item" onclick="showScreen('screen-counter', this, 1)">
-            <img src="assets/counter.png">
-        </div>
-        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
-            <img src="assets/gear.png">
-        </div>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
+        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
     </nav>
 
     <script src="script.js"></script>
