@@ -1,9 +1,29 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// Функция управления видимостью элементов при вводе
+function toggleUI(isFocused) {
+    const totalBar = document.getElementById('total-bar');
+    const bottomNav = document.getElementById('bottom-nav');
+    
+    if (isFocused) {
+        if (totalBar) totalBar.classList.add('ui-hide');
+        bottomNav.classList.add('ui-hide');
+    } else {
+        // Задержка, чтобы элементы не мерцали при переходе между полями
+        setTimeout(() => {
+            if (document.activeElement.tagName !== 'INPUT') {
+                if (totalBar) totalBar.classList.remove('ui-hide');
+                bottomNav.classList.remove('ui-hide');
+            }
+        }, 100);
+    }
+}
+
 function dismissKeyboard(e) {
     if (e.target.tagName !== 'INPUT') {
         document.querySelectorAll('input').forEach(i => i.blur());
+        toggleUI(false);
     }
 }
 
@@ -18,11 +38,8 @@ function showScreen(id, el, idx) {
         'screen-settings': 'Профиль' 
     };
     document.getElementById('header-title').innerText = titles[id];
-    
-    // Галочка только в счетчике
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
-    // Индикатор двигается только если нажат элемент меню (idx передан)
     if (idx !== undefined) moveIndicator(idx);
     
     if (el) {
@@ -40,10 +57,11 @@ function createNewRow() {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
-    // Цена теперь идет после названия в структуре, но позиционируется поверх CSS
     div.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name">
-        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()">
+        <input type="text" placeholder="товар..." class="item-name" 
+               onfocus="toggleUI(true)" onblur="toggleUI(false)">
+        <input type="number" placeholder="0" class="item-price" 
+               oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
     `;
     container.appendChild(div);
 
@@ -72,12 +90,16 @@ function saveAndHome() {
     const val = document.getElementById('total-value').innerText;
     localStorage.setItem('last_total', val);
     tg.HapticFeedback.notificationOccurred('success');
-    
-    // Возврат на главную через первую иконку
     showScreen('screen-home', document.querySelector('.tab-item'), 0);
 }
 
-// Конвертер
+// Слушатель для ввода в конвертере
+const convInput = document.getElementById('conv-input');
+if(convInput) {
+    convInput.addEventListener('focus', () => toggleUI(true));
+    convInput.addEventListener('blur', () => toggleUI(false));
+}
+
 async function convertCurrency() {
     const val = document.getElementById('conv-input').value;
     const f = document.getElementById('from-code').innerText;
@@ -107,7 +129,6 @@ function selectCurr(f, c) {
     convertCurrency();
 }
 
-// Данные профиля
 if(tg.initDataUnsafe?.user) {
     document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
     if(tg.initDataUnsafe.user.photo_url) {
