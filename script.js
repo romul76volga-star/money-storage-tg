@@ -1,18 +1,25 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Скрытие клавиатуры
+// 1. ЗАКРЫТИЕ КЛАВИАТУРЫ
 document.addEventListener('touchstart', (e) => {
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && !e.target.closest('.add-row-bar')) {
         document.activeElement.blur();
     }
 });
 
+// НАВИГАЦИЯ
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
+    const titles = { 
+        'screen-home': 'Главная', 
+        'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 
+        'screen-settings': 'Профиль' 
+    };
+    
     document.getElementById('header-title').innerText = titles[id];
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
@@ -20,36 +27,39 @@ function showScreen(id, el, idx) {
         const pos = ['7.5%', '41%', '74.5%'];
         document.getElementById('tab-indicator').style.left = pos[idx];
     }
+    
     if (el) {
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
     }
+    
     if (id === 'screen-home') renderCards();
 }
 
+// УПРАВЛЕНИЕ UI (Скрытие навигации при вводе)
 function toggleUI(isFocused, element = null) {
     const bottomNav = document.getElementById('bottom-nav');
     const totalBar = document.getElementById('total-bar');
-    const addBar = document.querySelector('.add-row-bar');
     
     if (isFocused) {
         bottomNav.classList.add('v-hide');
-        if (addBar) addBar.classList.add('v-hide');
         if (totalBar) totalBar.classList.add('on-keyboard');
         if (element) {
-            setTimeout(() => element.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
         }
     } else {
         setTimeout(() => {
             if (document.activeElement.tagName !== 'INPUT') {
                 bottomNav.classList.remove('v-hide');
-                if (addBar) addBar.classList.remove('v-hide');
                 if (totalBar) totalBar.classList.remove('on-keyboard');
             }
         }, 150);
     }
 }
 
+// ЛОГИКА СЧЕТЧИКА
 function createNewRow(name = '', price = '') {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
@@ -68,16 +78,20 @@ function updateTotal() {
     document.getElementById('total-value').innerText = t;
 }
 
-// Функции модального окна
+// СОХРАНЕНИЕ (Модальное окно на весь экран)
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     if (total === "0") return;
     document.getElementById('modal-total-value').innerText = total;
-    document.getElementById('modal-overlay').style.display = 'flex';
+    const modal = document.getElementById('modal-overlay');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex'; // Гарантируем центрирование
 }
 
-function cancelSave() {
-    document.getElementById('modal-overlay').style.display = 'none';
+function closeSaveModal() {
+    const modal = document.getElementById('modal-overlay');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
 }
 
 function confirmSave() {
@@ -89,13 +103,19 @@ function confirmSave() {
         if (name || price) items.push({ name, price });
     });
 
-    const saveData = { id: Date.now(), date: new Date().toLocaleDateString('ru-RU'), total: total, items: items };
+    const saveData = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('ru-RU'),
+        total: total,
+        items: items
+    };
+
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
     history.push(saveData);
     localStorage.setItem('money_history', JSON.stringify(history));
 
     tg.HapticFeedback.notificationOccurred('success');
-    cancelSave();
+    closeSaveModal();
     clearCounter();
     showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
 }
@@ -106,6 +126,7 @@ function clearCounter() {
     createNewRow();
 }
 
+// ОТРИСОВКА ИСТОРИИ (ГЛАВНАЯ)
 function renderCards() {
     const container = document.getElementById('cards-container');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
@@ -113,16 +134,30 @@ function renderCards() {
 
     if (history.length === 0) {
         container.classList.remove('cards-grid');
-        container.innerHTML = `<div class="center-content"><button class="add-btn-glass" onclick="showScreen('screen-counter')"><img src="assets/plus.png"></button><div class="bold-label">добавить</div></div>`;
+        container.innerHTML = `
+            <div class="center-content">
+                <button class="add-btn-glass" onclick="showScreen('screen-counter')"><img src="assets/plus.png"></button>
+                <div class="bold-label">добавить</div>
+            </div>`;
     } else {
         container.classList.add('cards-grid');
         [...history].reverse().forEach((data, index) => {
             const card = document.createElement('div');
             card.className = 'save-card';
             card.onclick = () => loadSavedData(data);
-            card.innerHTML = `<button class="delete-btn" onclick="deleteCard(event, ${history.length - 1 - index})">✕</button><div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
+            card.innerHTML = `
+                <button class="delete-btn" onclick="deleteCard(event, ${history.length - 1 - index})">✕</button>
+                <div class="card-date">${data.date}</div>
+                <div class="card-amount">${data.total}</div>
+            `;
             container.appendChild(card);
         });
+
+        const addCard = document.createElement('div');
+        addCard.className = 'save-card dashed';
+        addCard.innerHTML = '<span>+</span>';
+        addCard.onclick = () => { clearCounter(); showScreen('screen-counter'); };
+        container.appendChild(addCard);
     }
 }
 
@@ -143,27 +178,10 @@ function loadSavedData(data) {
     showScreen('screen-counter');
 }
 
-// Конвертер
-async function convertCurrency() {
-    const val = document.getElementById('conv-input').value;
-    const f = document.getElementById('from-code').innerText;
-    const t = document.getElementById('to-code').innerText;
-    if(!val) return;
-    try {
-        const r = await fetch(`https://api.exchangerate-api.com/v4/latest/${f}`);
-        const d = await r.json();
-        document.getElementById('conv-result').innerText = (val * d.rates[t]).toFixed(2);
-    } catch { document.getElementById('conv-result').innerText = "0.00"; }
-}
-
-function openPicker(side) { window.pickingSide = side; document.getElementById('picker').classList.remove('hidden'); }
-function closePicker() { document.getElementById('picker').classList.add('hidden'); }
-function selectCurr(f, c) {
-    const side = window.pickingSide;
-    document.getElementById(`${side}-flag`).innerText = f;
-    document.getElementById(`${side}-code`).innerText = c;
-    closePicker(); convertCurrency();
-}
-
+// ИНИЦИАЛИЗАЦИЯ
 createNewRow();
 renderCards();
+if(tg.initDataUnsafe?.user) {
+    const userNameElement = document.getElementById('user-name');
+    if (userNameElement) userNameElement.innerText = tg.initDataUnsafe.user.first_name;
+}
