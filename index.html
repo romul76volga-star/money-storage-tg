@@ -27,7 +27,7 @@
             <div id="items-list" class="scrollable-content">
                 </div>
             
-            <div class="bottom-controls">
+            <div id="counter-controls" class="bottom-controls">
                 <div class="add-row-trigger" onclick="createNewRow()">
                     <div class="add-box-border"><span>+</span></div>
                 </div>
@@ -39,19 +39,14 @@
         </section>
 
         <section id="screen-converter" class="screen">
-            <div class="scrollable-content">
-                <div class="glass-box">
-                    <h3>Конвертер</h3>
-                    <p>Раздел в разработке</p>
-                </div>
-            </div>
+            <div class="scrollable-content"><div class="glass-box"><h3>Конвертер</h3></div></div>
         </section>
 
         <section id="screen-settings" class="screen">
             <div class="scrollable-content">
                 <div class="glass-box">
                     <h3>Профиль</h3>
-                    <button class="danger-btn" onclick="clearData()">Очистить все данные</button>
+                    <button class="danger-btn" onclick="clearData()">Очистить всё</button>
                 </div>
             </div>
         </section>
@@ -63,7 +58,7 @@
             <img src="assets/home.png" alt="home">
         </div>
         <div class="tab-item" onclick="showScreen('screen-converter', this, 1)">
-            <img src="assets/dollar.png" alt="converter">
+            <img src="assets/dollar.png" alt="dollar">
         </div>
         <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
             <img src="assets/gear.png" alt="settings">
