@@ -8,86 +8,37 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { background: var(--bg); margin: 0; color: white; font-family: sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-/* Хедер */
-.app-header {
-    background: var(--header-dark);
-    height: 70px;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    z-index: 100;
-}
+.app-header { background: var(--header-dark); height: 70px; padding: 0 20px; display: flex; align-items: center; z-index: 100; flex-shrink: 0; }
 .header-content { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 22px; font-weight: bold; }
+.header-check-btn { background: white; width: 45px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #333; cursor: pointer; }
 
-.header-check-btn {
-    background: white;
-    width: 38px;
-    height: 28px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333;
-    cursor: pointer;
-}
+.screen { display: none; flex: 1; overflow: hidden; }
+.screen.active { display: flex; flex-direction: column; }
 
-/* Экраны и Скролл */
-.screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-.screen.active { display: flex; }
+.scroll-wrapper { flex: 1; overflow-y: auto; padding: 20px 20px 100px; display: flex; flex-direction: column; gap: 15px; }
 
-.scroll-wrapper { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; display: flex; flex-direction: column; gap: 15px; }
+/* Верстка счетчика для мобильных */
+.counter-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 .scroll-wrapper-rows { flex: 1; overflow-y: auto; padding: 10px 20px; display: flex; flex-direction: column; gap: 12px; }
 
-/* Карточки файлов */
-.history-card {
-    background: var(--glass);
-    border-radius: 25px;
-    padding: 25px;
-    position: relative;
-    min-height: 120px;
-    flex-shrink: 0;
-}
+/* Овальная кнопка добавления */
+.add-row-trigger { padding: 0 20px; margin: 10px 0; flex-shrink: 0; }
+.add-box-border { border: 2px solid white; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 40px; border-radius: 30px; }
+
+.history-card { background: var(--glass); border-radius: 25px; padding: 25px; position: relative; min-height: 120px; cursor: pointer; }
 .card-sum { font-size: 28px; font-weight: bold; margin-top: 10px; }
+.del-btn { position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; }
 
-/* Полупрозрачный крестик */
-.del-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    font-size: 16px;
-}
-
-/* Кнопки "Добавить" */
-.first-add-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; }
-.big-circle-btn { width: 100px; height: 100px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; margin-bottom: 10px; }
-
-.mini-add-plate { border: 2px dashed rgba(255,255,255,0.4); border-radius: 25px; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; }
-
-/* Плашка добавления строки (Скрин 1) */
-.add-row-trigger { padding: 0 20px; margin-bottom: 10px; }
-.add-box-border { border: 2px solid white; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: 100; }
-
-/* Инпуты */
 .input-row { display: flex; position: relative; flex-shrink: 0; }
-.item-name { flex: 1; border-radius: 15px; border: none; padding: 15px; font-size: 16px; height: 55px; outline: none; }
+.item-name { flex: 1; border-radius: 15px; border: none; padding: 15px; font-size: 16px; height: 55px; outline: none; padding-right: 90px; }
 .item-price { position: absolute; right: 5px; top: 5px; bottom: 5px; width: 80px; background: var(--header-dark); border-radius: 12px; border: none; color: white; text-align: center; font-weight: bold; outline: none; }
 
-/* Итог */
-.total-plate { background: var(--yellow); margin: 15px 20px; padding: 15px; border-radius: 20px; text-align: center; color: #333; }
+.total-plate { background: var(--yellow); margin: 10px 20px 20px; padding: 15px; border-radius: 20px; text-align: center; color: #333; flex-shrink: 0; }
 
-/* Навигация */
-.tab-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--header-dark); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+.tab-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--header-dark); display: flex; justify-content: space-around; align-items: center; z-index: 1000; transition: transform 0.3s; }
+.ui-hidden { transform: translateY(100px); }
 .tab-item img { width: 26px; filter: brightness(0) invert(1); opacity: 0.5; }
 .tab-item.active img { opacity: 1; }
 #tab-indicator { position: absolute; top: 10px; width: 45px; height: 45px; background: var(--glass); border-radius: 50%; transition: 0.3s; pointer-events: none; }
 
 .hidden { display: none !important; }
-.ui-hidden { display: none !important; }
-.danger-btn { background: #ff4d4d; border: none; padding: 15px; border-radius: 15px; color: white; width: 100%; }
-.placeholder-box { background: var(--glass); padding: 30px; border-radius: 25px; text-align: center; }
