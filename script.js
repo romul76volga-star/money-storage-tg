@@ -1,6 +1,7 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// Закрытие клавиатуры тапом по пустому месту
 document.addEventListener('touchstart', (e) => {
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         document.activeElement.blur();
@@ -22,7 +23,7 @@ function showScreen(id, el, idx) {
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
     if (idx !== undefined) {
-        const pos = ['8%', '41%', '74%'];
+        const pos = ['8%', '41%', '74%']; // Центровка кружка под иконками
         document.getElementById('tab-indicator').style.left = pos[idx];
     }
     
@@ -33,7 +34,7 @@ function showScreen(id, el, idx) {
     if (id === 'screen-home') renderCards();
 }
 
-// Полное скрытие навигации и плашки суммы при вводе
+// СКРЫТИЕ НАВИГАЦИИ И ПЛАНКИ ПРИ КЛАВИАТУРЕ
 function toggleUI(isFocused) {
     const bottomNav = document.getElementById('bottom-nav');
     const totalBar = document.getElementById('total-bar');
@@ -78,7 +79,12 @@ function closeSaveModal() {
 }
 
 function confirmSave() {
-    // Тут твоя логика localStorage...
+    const total = document.getElementById('total-value').innerText;
+    const history = JSON.parse(localStorage.getItem('money_history') || '[]');
+    history.push({ id: Date.now(), date: new Date().toLocaleDateString('ru-RU'), total: total });
+    localStorage.setItem('money_history', JSON.stringify(history));
+    
+    tg.HapticFeedback.notificationOccurred('success');
     closeSaveModal();
     clearCounter();
     showScreen('screen-home', document.querySelector('.tab-item'), 0);
@@ -90,5 +96,30 @@ function clearCounter() {
     createNewRow();
 }
 
+function renderCards() {
+    const container = document.getElementById('cards-container');
+    const history = JSON.parse(localStorage.getItem('money_history') || '[]');
+    container.innerHTML = '';
+
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div class="center-content">
+                <div class="add-btn-glass" onclick="showScreen('screen-counter', null, 1)"><span>+</span></div>
+                <div class="bold-label">добавить</div>
+            </div>`;
+    } else {
+        [...history].reverse().forEach(data => {
+            const card = document.createElement('div');
+            card.className = 'save-card';
+            card.innerHTML = `<div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
+            container.appendChild(card);
+        });
+    }
+}
+
 // Инициализация
 createNewRow();
+renderCards();
+if(tg.initDataUnsafe?.user) {
+    document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+}
