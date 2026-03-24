@@ -11,13 +11,18 @@ function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
+    const titles = { 
+        'screen-home': 'Главная', 
+        'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 
+        'screen-settings': 'Профиль' 
+    };
     document.getElementById('header-title').innerText = titles[id];
     
-    // Показать/скрыть галочку
+    // Галочка только в счетчике
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
-    // Если нажали на плюс (без idx), индикатор не двигаем
+    // Индикатор двигается только если нажат элемент меню (idx передан)
     if (idx !== undefined) moveIndicator(idx);
     
     if (el) {
@@ -31,23 +36,14 @@ function moveIndicator(idx) {
     document.getElementById('tab-indicator').style.left = pos[idx];
 }
 
-// ГАЛОЧКА: сохранение данных
-function saveAndHome() {
-    const totalValue = document.getElementById('total-value').innerText;
-    localStorage.setItem('savedTotal', totalValue);
-    tg.HapticFeedback.notificationOccurred('success');
-    
-    // Возвращаемся домой
-    showScreen('screen-home', document.querySelector('.tab-item'), 0);
-}
-
 function createNewRow() {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
+    // Цена теперь идет после названия в структуре, но позиционируется поверх CSS
     div.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name">
-        <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()">
+        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()">
     `;
     container.appendChild(div);
 
@@ -62,12 +58,23 @@ function createNewRow() {
         }
     });
 }
+
+// Инициализация первой строки
 createNewRow();
 
 function updateTotal() {
     let t = 0;
     document.querySelectorAll('.item-price').forEach(i => t += Number(i.value) || 0);
     document.getElementById('total-value').innerText = t;
+}
+
+function saveAndHome() {
+    const val = document.getElementById('total-value').innerText;
+    localStorage.setItem('last_total', val);
+    tg.HapticFeedback.notificationOccurred('success');
+    
+    // Возврат на главную через первую иконку
+    showScreen('screen-home', document.querySelector('.tab-item'), 0);
 }
 
 // Конвертер
@@ -80,14 +87,18 @@ async function convertCurrency() {
         const r = await fetch(`https://api.exchangerate-api.com/v4/latest/${f}`);
         const d = await r.json();
         document.getElementById('conv-result').innerText = (val * d.rates[t]).toFixed(2);
-    } catch { document.getElementById('conv-result').innerText = "0.00"; }
+    } catch { 
+        document.getElementById('conv-result').innerText = "0.00"; 
+    }
 }
 
 function openPicker(side) { 
     window.pickingSide = side; 
     document.getElementById('picker').classList.remove('hidden'); 
 }
+
 function closePicker() { document.getElementById('picker').classList.add('hidden'); }
+
 function selectCurr(f, c) {
     const side = window.pickingSide;
     document.getElementById(`${side}-flag`).innerText = f;
@@ -95,3 +106,13 @@ function selectCurr(f, c) {
     closePicker();
     convertCurrency();
 }
+
+// Данные профиля
+if(tg.initDataUnsafe?.user) {
+    document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+    if(tg.initDataUnsafe.user.photo_url) {
+        document.getElementById('user-avatar').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
+    }
+}
+
+function clearData() { localStorage.clear(); location.reload(); }
