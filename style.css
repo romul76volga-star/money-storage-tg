@@ -3,13 +3,9 @@
     --header-dark: rgba(93, 107, 94, 0.9);
     --yellow: #f2e4b4;
     --glass: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.15);
 }
 
-* { 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body { 
     background: var(--bg); 
@@ -17,199 +13,69 @@ body {
     color: white; 
     font-family: -apple-system, sans-serif; 
     height: 100vh; 
-    width: 100vw;
-    overflow: hidden; /* Запрещаем общий скролл страницы */
+    overflow: hidden; 
     display: flex; 
     flex-direction: column; 
 }
 
-/* ШАПКА */
 .app-header { 
     height: 60px; 
     background: var(--header-dark); 
-    backdrop-filter: blur(10px);
     display: flex; 
     align-items: center; 
     padding: 0 20px; 
-    flex-shrink: 0;
     z-index: 100;
 }
 
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
-}
+.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; }
 
-/* КОНТЕНТ */
-#app-content {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-}
+#app-content { flex: 1; position: relative; overflow: hidden; }
 
-.screen { 
-    display: none; 
-    height: 100%; 
-    flex-direction: column; 
-}
-
+.screen { display: none; height: 100%; flex-direction: column; }
 .screen.active { display: flex; }
 
-/* ОБЛАСТЬ СКРОЛЛА (для товаров и папок) */
-.scrollable-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    -webkit-overflow-scrolling: touch;
-}
+.scrollable-content { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
 
-/* СЕТКА ПАПОК НА ГЛАВНОЙ */
+/* КАРТОЧКИ: Одинаковый размер всегда */
 .cards-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    padding-bottom: 100px; /* Место под меню */
+    padding-bottom: 120px;
 }
 
 .history-card {
-    aspect-ratio: 1 / 1; /* Строго квадратные */
+    height: 140px; /* Жестко фиксированная высота */
     background: var(--glass);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 20px;
-    padding: 15px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: relative;
-    transition: transform 0.2s;
 }
 
 .card-date { font-size: 13px; opacity: 0.7; margin-bottom: 5px; }
-.card-sum { font-size: 16px; font-weight: bold; }
+.card-sum { font-size: 16px; font-weight: bold; width: 90%; text-align: center; overflow: hidden; text-overflow: ellipsis; }
 
-.del-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    font-size: 10px;
-}
+.del-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; }
 
-/* СТРОКИ ВВОДА В СЧЕТЧИКЕ */
-.input-row { 
-    display: flex; 
-    background: white; 
-    border-radius: 12px; 
-    margin-bottom: 8px;
-    height: 48px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
+/* СТРОКИ И ЦЕНА */
+.input-row { display: flex; background: white; border-radius: 12px; margin-bottom: 8px; height: 48px; overflow: hidden; flex-shrink: 0; }
+.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; outline: none; }
+.item-price { width: 100px; background: #5d6b5e; border: none; color: white; text-align: left; padding-left: 12px; font-weight: bold; outline: none; }
 
-.item-name { 
-    flex: 1; 
-    border: none; 
-    padding-left: 15px; 
-    font-size: 16px; 
-    outline: none; 
-}
-
-/* ЦЕНА - Смещена левее и расширена */
-.item-price { 
-    width: 100px; 
-    background: #5d6b5e; 
-    border: none; 
-    color: white; 
-    text-align: left; 
-    padding-left: 12px;
-    font-weight: bold; 
-    outline: none; 
-}
-
-/* НИЖНЯЯ ПАНЕЛЬ СЧЕТЧИКА */
-.bottom-controls {
-    padding: 10px 15px;
-    background: var(--bg);
-    flex-shrink: 0;
-    padding-bottom: 100px; /* Чтобы не перекрывалось меню */
-}
-
-.add-box-border {
-    border: 2px dashed rgba(255,255,255,0.4);
-    border-radius: 15px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-/* ЖЕЛТАЯ ПЛАШКА */
-.total-plate { 
-    background: var(--yellow); 
-    padding: 12px; 
-    border-radius: 18px; 
-    text-align: center; 
-    color: #333;
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-}
-
-.total-label { font-size: 10px; font-weight: bold; opacity: 0.8; margin-bottom: 2px; }
+/* НИЖНИЕ БЛОКИ */
+.bottom-controls { padding: 10px 15px; background: var(--bg); flex-shrink: 0; padding-bottom: 100px; }
+.add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 15px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px; }
+.total-plate { background: var(--yellow); padding: 12px; border-radius: 18px; text-align: center; color: #333; }
+.total-label { font-size: 10px; font-weight: bold; opacity: 0.8; }
 .total-sum { font-size: 22px; font-weight: 800; }
 
-/* ТАБ-БАР (Нижнее меню) */
-.tab-bar { 
-    position: fixed; 
-    bottom: 15px; 
-    left: 20px; 
-    right: 20px; 
-    height: 60px; 
-    background: rgba(35, 35, 35, 0.85); 
-    border-radius: 30px; 
-    display: flex; 
-    justify-content: space-around; 
-    align-items: center; 
-    backdrop-filter: blur(10px);
-    z-index: 1000;
-}
-
-/* ИСПРАВЛЕНИЕ РАЗМЕРА ИКОНОК */
-.tab-item {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 2;
-}
-
-.tab-item img {
-    width: 26px; /* Фиксированный размер */
-    height: 26px;
-    object-fit: contain;
-    opacity: 0.5;
-}
-
+/* МЕНЮ */
+.tab-bar { position: fixed; bottom: 15px; left: 20px; right: 20px; height: 60px; background: rgba(35, 35, 35, 0.85); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+.tab-item img { width: 26px; height: 26px; opacity: 0.5; }
 .tab-item.active img { opacity: 1; }
-
-#tab-indicator {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1;
-}
-
+#tab-indicator { position: absolute; width: 44px; height: 44px; background: rgba(255, 255, 255, 0.15); border-radius: 50%; transition: 0.3s; z-index: 1; }
 .hidden { display: none !important; }
