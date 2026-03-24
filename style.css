@@ -1,27 +1,56 @@
 :root { --bg: #7a8a7c; --dark-green: #5d6b5e; --yellow: #f2e4b4; --glass: rgba(255, 255, 255, 0.2); }
 body { background: var(--bg); margin: 0; color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-family: sans-serif; }
 
-/* ИКОНКИ (Увеличены, не выходят за границы) */
-.tab-bar { height: 85px; background: var(--dark-green); display: flex; justify-content: space-around; align-items: center; position: relative; padding-bottom: 15px; }
-.tab-item img { width: 32px; height: 32px; filter: brightness(0) invert(1); opacity: 0.5; }
+/* Фикс меню */
+.tab-bar { 
+    position: fixed; bottom: 0; width: 100%; height: 75px; 
+    background: var(--dark-green); display: flex; justify-content: space-around; 
+    align-items: center; z-index: 1000; padding-bottom: 10px;
+}
+.ui-hidden { display: none !important; }
+
+.tab-item img { width: 28px; height: 28px; filter: brightness(0) invert(1); opacity: 0.5; position: relative; z-index: 5; }
 .tab-item.active img { opacity: 1; }
-#tab-indicator { position: absolute; width: 55px; height: 55px; background: var(--glass); border-radius: 50%; transition: 0.3s; bottom: 23px; }
 
-/* МОДАЛКА НА ВЕСЬ ЭКРАН */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-.modal-card { background: var(--dark-green); width: 85%; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-.modal-confirm-btn { background: var(--yellow); color: #333; border: none; width: 100%; padding: 15px; border-radius: 15px; font-weight: bold; margin-top: 20px; }
+#tab-indicator { 
+    position: absolute; width: 50px; height: 50px; 
+    background: var(--glass); border-radius: 50%; 
+    transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+    top: 8px; left: 16.5%; 
+}
 
-/* СТИЛЬ СТРОК (Оригинальный) */
+/* СТИЛЬ СТРОК (Твой оригинальный) */
 .input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
-.item-name { flex: 1; background: white; border: none; border-radius: 15px; padding: 15px; height: 50px; color: #333; }
-.item-price { position: absolute; right: 5px; width: 70px; height: 40px; background: var(--dark-green); color: white; border: none; border-radius: 12px; text-align: center; font-weight: bold; }
+.item-name { 
+    flex: 1; background: white; border: none; border-radius: 15px; 
+    padding: 15px; height: 50px; color: #333; outline: none; font-size: 16px;
+}
+.item-price { 
+    position: absolute; right: 5px; width: 75px; height: 42px; 
+    background: var(--dark-green); color: white; border: none; 
+    border-radius: 12px; text-align: center; font-weight: bold; outline: none;
+}
 
-/* ПЛАШКА "+" */
-.add-row-bar { background: var(--glass); height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 15px 0; border: 2px dashed rgba(255,255,255,0.3); }
-.add-row-bar span { font-size: 30px; }
+/* Кнопка на главной */
+.add-btn-container { text-align: center; margin-top: 40px; }
+.add-btn-glass { 
+    width: 80px; height: 80px; border-radius: 50%; border: 2px solid white;
+    background: none; color: white; font-size: 40px; margin-bottom: 10px;
+}
 
-.total-container { background: var(--yellow); color: #333; padding: 15px; border-radius: 20px; position: fixed; bottom: 100px; left: 20px; right: 20px; text-align: center; }
-.screen { display: none !important; flex: 1; padding: 20px; }
-.screen.active { display: flex !important; flex-direction: column; }
+/* Карточки с удалением */
+.history-card { 
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px; margin: 10px 0; border-radius: 15px; background: var(--glass);
+}
+.del-card-btn { background: #ff4d4d; border: none; color: white; border-radius: 50%; width: 24px; height: 24px; }
+
+/* Общие стили */
+.screen { display: none; flex: 1; padding: 20px; overflow-y: auto; }
+.screen.active { display: flex; flex-direction: column; }
+.total-container { 
+    background: var(--yellow); color: #333; padding: 15px; 
+    border-radius: 20px; position: fixed; bottom: 95px; left: 20px; right: 20px; text-align: center; 
+}
 .hidden { display: none !important; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; }
