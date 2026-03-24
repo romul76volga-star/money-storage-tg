@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Money App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <section id="screen-home" class="screen active">
+            <div class="empty-state" id="empty-view">
+                <button class="add-main-btn" onclick="showScreen('screen-counter')">
+                    <img src="assets/plus.png" alt="add">
+                </button>
+                <p>добавить</p>
+            </div>
+            <div id="saved-data-view" class="hidden">
+                </div>
+        </section>
+
+        <section id="screen-counter" class="screen">
+            <header class="glass-header">
+                <span>счетчик</span>
+                <button class="save-check-btn" onclick="saveAndHome()">✓</button>
+            </header>
+            <div id="items-list" class="scroll-container">
+                <div class="input-row">
+                    <input type="text" placeholder="товар..." class="item-name">
+                    <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()">
+                </div>
+            </div>
+            <div class="total-bar">
+                <div id="total-value">0</div>
+            </div>
+        </section>
+
+        <section id="screen-converter" class="screen">
+            <header class="glass-header">конвертер</header>
+            <div class="converter-container">
+                <input type="number" id="conv-input" value="1000" oninput="convertCurrency()">
+                
+                <div class="currency-selectors">
+                    <div class="select-box" onclick="toggleCurrencyList('from')">
+                        <span id="from-flag">🇷🇺</span> <span id="from-code">RUB</span>
+                    </div>
+                    <img src="assets/swap.png" class="swap-icon">
+                    <div class="select-box" onclick="toggleCurrencyList('to')">
+                        <span id="to-flag">🇺🇸</span> <span id="to-code">USD</span>
+                    </div>
+                </div>
+                <div id="conv-result">...</div>
+            </div>
+        </section>
+
+        <section id="screen-settings" class="screen">
+            <header class="glass-header">настройки</header>
+            <div class="profile-card glass">
+                <div class="avatar"></div>
+                <div class="nickname">никнейм</div>
+            </div>
+            <div class="divider"></div>
+        </section>
+
+        <nav class="tab-bar">
+            <div class="tab-item active" onclick="showScreen('screen-home', this)">
+                <img src="assets/home.png">
+            </div>
+            <div class="tab-item" onclick="showScreen('screen-converter', this)">
+                <img src="assets/dollar.png">
+            </div>
+            <div class="tab-item" onclick="showScreen('screen-settings', this)">
+                <img src="assets/gear.png">
+            </div>
+        </nav>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
