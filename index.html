@@ -14,7 +14,7 @@
             <div id="modal-total-value" class="modal-total-amount">0</div>
             <div class="modal-actions">
                 <button class="modal-btn confirm" onclick="confirmSave()">✓</button>
-                <button class="modal-btn cancel" onclick="closeModal()">✕</button>
+                <button class="modal-btn cancel" onclick="cancelSave()">✕</button>
             </div>
         </div>
     </div>
@@ -42,19 +42,17 @@
                 <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
                 <div class="currency-row">
                     <div class="curr-select glass-border" onclick="openPicker('from')">
-                        <div id="from-flag">🇷🇺</div>
-                        <div id="from-code">RUB</div>
+                        <div id="from-flag">🇷🇺</div><div id="from-code">RUB</div>
                     </div>
                     <img src="assets/swap.png" class="swap-icon">
                     <div class="curr-select glass-border" onclick="openPicker('to')">
-                        <div id="to-flag">🇺🇸</div>
-                        <div id="to-code">USD</div>
+                        <div id="to-flag">🇺🇸</div><div id="to-code">USD</div>
                     </div>
                 </div>
                 <div id="conv-result">0.00</div>
             </div>
             <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
-                <div class="picker-card">
+                <div class="picker-card glass">
                     <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
                     <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
                     <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
@@ -68,8 +66,8 @@
                 <div id="user-avatar" class="avatar-big"></div>
                 <h2 id="user-name">Загрузка...</h2>
                 <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.2.5</span></div>
-                    <div class="s-row" onclick="clearData()"><span style="color:#ff453a">Сбросить данные</span><span>→</span></div>
+                    <div class="s-row"><span>Версия</span><span>1.5.0</span></div>
+                    <div class="s-row" onclick="clearData()"><span style="color:#ff453a">Очистить всё</span><span>→</span></div>
                 </div>
             </div>
         </section>
@@ -78,7 +76,7 @@
     <nav id="bottom-nav" class="tab-bar">
         <div id="tab-indicator"></div>
         <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-counter', this, 1)"><img src="assets/dollar.png"></div>
+        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
         <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
     </nav>
 
