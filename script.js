@@ -3,124 +3,115 @@ tg.expand();
 
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 
-// Закрытие клавиатуры при тапе по пустому месту
-function handleGlobalClick(e) {
-    if (e.target.tagName !== 'INPUT') {
-        document.activeElement.blur();
-    }
-}
-
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const targetScreen = document.getElementById(id);
-    if(targetScreen) targetScreen.classList.add('active');
+    document.getElementById(id).classList.add('active');
     
-    // Титлы
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
-    document.getElementById('header-title').innerText = titles[id] || 'Money App';
+    // Галочка только на экране счетчика
+    document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
     
-    // Кнопка сохранения только в счетчике
-    document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
+    // Заголовки
+    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-settings': 'Профиль' };
+    document.getElementById('screen-title').innerText = titles[id] || '';
 
-    // Исправленный индикатор (кружок)
+    // Индикатор меню
     if (idx !== undefined) {
-        const indicator = document.getElementById('tab-indicator');
-        const positions = ['16.5%', '50%', '83.5%']; 
-        indicator.style.left = positions[idx];
-        indicator.style.transform = 'translateX(-50%)';
-    }
-
-    if (el) {
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
+        const positions = ['16.5%', '50%', '83.5%'];
+        document.getElementById('tab-indicator').style.left = positions[idx];
+        document.getElementById('tab-indicator').style.transform = 'translateX(-50%)';
     }
 
     if (id === 'screen-home') renderCards();
 }
 
-// Скрытие UI при печати
-function toggleUI(isFocused) {
-    const nav = document.getElementById('bottom-nav');
-    const total = document.getElementById('total-bar');
-    if (isFocused) {
-        nav.classList.add('ui-hidden');
-        if (total) total.classList.add('ui-hidden');
-    } else {
-        setTimeout(() => {
-            nav.classList.remove('ui-hidden');
-            if (total) total.classList.remove('ui-hidden');
-        }, 100);
-    }
-}
-
-function createNewRow(name = '', price = '') {
-    const container = document.getElementById('items-list');
-    const div = document.createElement('div');
-    div.className = 'input-row';
-    div.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name" value="${name}" onfocus="toggleUI(true)" onblur="toggleUI(false)">
-        <input type="number" class="item-price" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
-    `;
-    container.appendChild(div);
-}
-
-function updateTotal() {
-    let t = 0;
-    document.querySelectorAll('.item-price').forEach(i => t += Number(i.value) || 0);
-    document.getElementById('total-value').innerText = t;
-}
-
 function renderCards() {
     const container = document.getElementById('cards-container');
-    container.innerHTML = `
-        <div class="add-btn-container">
-            <button class="add-btn-glass" onclick="showScreen('screen-counter', null, 0)">+</button>
-            <div class="bold-label">добавить</div>
-        </div>`;
-    
-    savedRecords.forEach((rec, index) => {
-        const card = document.createElement('div');
-        card.className = 'history-card glass';
-        card.innerHTML = `
-            <div onclick="openOldRecord(${index})">
+    container.innerHTML = '';
+
+    if (savedRecords.length === 0) {
+        // ВИД 1: Круглая кнопка (когда пусто)
+        container.innerHTML = `
+            <div class="first-add-wrapper" onclick="showScreen('screen-counter', null, 1)">
+                <div class="big-circle-btn">+</div>
+                <div style="font-weight:bold; font-size:18px;">добавить</div>
+            </div>`;
+    } else {
+        // ВИД 2: Файлы + кнопка как на Скрине 2
+        savedRecords.forEach((rec, index) => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            card.innerHTML = `
                 <div class="card-date">${rec.date}</div>
                 <div class="card-sum">${rec.total} RUB</div>
-            </div>
-            <button class="del-card-btn" onclick="deleteCard(${index})">✕</button>
-        `;
-        container.appendChild(card);
-    });
+                <button class="del-btn" onclick="deleteCard(${index})">✕</button>
+            `;
+            container.appendChild(card);
+        });
+
+        const addPlate = document.createElement('div');
+        addPlate.className = 'mini-add-plate';
+        addPlate.innerHTML = '+';
+        addPlate.onclick = () => showScreen('screen-counter', null, 1);
+        container.appendChild(addPlate);
+    }
 }
 
 function deleteCard(index) {
-    savedRecords.splice(index, 1);
-    localStorage.setItem('money_logs', JSON.stringify(savedRecords));
-    renderCards();
+    // Подтверждение перед удалением
+    if (confirm("Вы уверены, что хотите удалить этот файл?")) {
+        savedRecords.splice(index, 1);
+        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
+        renderCards();
+    }
 }
 
-function confirmSave() {
-    const total = document.getElementById('total-value').innerText;
-    if (total > 0) {
-        const now = new Date();
-        savedRecords.unshift({
-            date: now.toLocaleDateString(),
-            total: total,
-            items: [] // здесь можно сохранять массив имен товаров
-        });
-        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
-    }
-    closeSaveModal();
-    showScreen('screen-home', document.querySelector('.tab-item'), 0);
+function createNewRow() {
+    const list = document.getElementById('items-list');
+    const row = document.createElement('div');
+    row.className = 'input-row';
+    row.innerHTML = `
+        <input type="text" placeholder="товар..." class="item-name" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+        <input type="number" class="item-price" placeholder="0" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+    `;
+    list.appendChild(row);
+    // Авто-скролл вниз при добавлении новой строки
+    list.scrollTop = list.scrollHeight;
+}
+
+function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.item-price').forEach(input => {
+        total += Number(input.value) || 0;
+    });
+    document.getElementById('total-value').innerText = total;
 }
 
 function saveAndHome() {
-    updateTotal();
-    document.getElementById('modal-total-value').innerText = document.getElementById('total-value').innerText;
-    document.getElementById('modal-overlay').classList.remove('hidden');
+    const total = document.getElementById('total-value').innerText;
+    if (total > 0) {
+        savedRecords.unshift({
+            date: new Date().toLocaleDateString(),
+            total: total
+        });
+        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
+        // Очистка полей
+        document.getElementById('items-list').innerHTML = '';
+        document.getElementById('total-value').innerText = '0';
+        createNewRow();
+        showScreen('screen-home', document.querySelector('.tab-item'), 0);
+    }
 }
 
-function closeSaveModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
+function toggleUI(isFocused) {
+    const nav = document.getElementById('bottom-nav');
+    if (isFocused) nav.classList.add('ui-hidden');
+    else setTimeout(() => nav.classList.remove('ui-hidden'), 100);
+}
 
-// Инициализация
+function handleGlobalClick(e) {
+    if (e.target.tagName !== 'INPUT') document.activeElement.blur();
+}
+
+// Старт
 createNewRow();
 renderCards();
