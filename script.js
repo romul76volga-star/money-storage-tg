@@ -1,62 +1,39 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
+tg.enableClosingConfirmation();
 
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 
 function showScreen(id, el, idx) {
+    // Скрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const target = document.getElementById(id);
-    if (target) target.classList.add('active');
+    document.getElementById(id).classList.add('active');
     
+    // Заголовок
     const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
-    document.getElementById('screen-title').innerText = titles[id] || '';
+    document.getElementById('screen-title').innerText = titles[id];
+    
+    // Галочка в хедере
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
+    // Плавное перемещение индикатора (кружка) в меню
     if (idx !== undefined) {
         const positions = ['16.5%', '50%', '83.5%'];
-        document.getElementById('tab-indicator').style.left = positions[idx];
-        document.getElementById('tab-indicator').style.transform = 'translateX(-50%)';
+        const indicator = document.getElementById('tab-indicator');
+        indicator.style.left = positions[idx];
+        indicator.style.transform = 'translateX(-50%)';
     }
 
-    if (el) {
-        document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
+    // Активная иконка
+    document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+    if (el) el.classList.add('active');
+    else {
+        // Если перешли не через клик по меню (например, через "Добавить")
+        document.querySelectorAll('.tab-item')[idx].classList.add('active');
     }
 
     if (id === 'screen-home') renderCards();
-}
-
-function renderCards() {
-    const container = document.getElementById('cards-container');
-    container.innerHTML = '';
-
-    if (savedRecords.length === 0) {
-        container.innerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:60vh;" onclick="openFile(-1)">
-                <div style="width:100px; height:100px; border:2px solid white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:50px; margin-bottom:10px;">+</div>
-                <div style="font-weight:bold;">добавить</div>
-            </div>`;
-    } else {
-        savedRecords.forEach((rec, index) => {
-            const card = document.createElement('div');
-            card.className = 'history-card';
-            card.onclick = () => openFile(index);
-            card.innerHTML = `
-                <div class="card-date">${rec.date}</div>
-                <div class="card-sum">${rec.total} RUB</div>
-                <button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
-            `;
-            container.appendChild(card);
-        });
-        
-        const addBtn = document.createElement('div');
-        addBtn.className = 'add-box-border';
-        addBtn.style.height = '100px';
-        addBtn.innerHTML = '+';
-        addBtn.onclick = () => openFile(-1);
-        container.appendChild(addBtn);
-    }
 }
 
 function openFile(index) {
@@ -70,11 +47,12 @@ function openFile(index) {
     } else {
         const data = savedRecords[index];
         data.items.forEach(item => {
-            const row = createRowElement(item.name, item.price);
-            list.appendChild(row);
+            list.appendChild(createRowElement(item.name, item.price));
         });
         updateTotal();
     }
+    // Переход на экран счетчика (кружок в меню на индекс 1 - Конвертер/Счетчик)
+    // Так как счетчик — это часть процесса ввода, визуально оставляем на главной или конвертере
     showScreen('screen-counter', null, 1);
 }
 
@@ -89,7 +67,10 @@ function createRowElement(name = '', price = '') {
 }
 
 function createNewRow() {
-    document.getElementById('items-list').appendChild(createRowElement());
+    const list = document.getElementById('items-list');
+    list.appendChild(createRowElement());
+    // Плавный скролл вниз
+    setTimeout(() => list.scrollTo({top: list.scrollHeight, behavior: 'smooth'}), 50);
 }
 
 function updateTotal() {
@@ -120,27 +101,51 @@ function saveAndHome() {
     }
 }
 
-function deleteCard(idx, e) {
-    e.stopPropagation();
-    if (confirm("Удалить файл?")) {
-        savedRecords.splice(idx, 1);
-        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
-        renderCards();
+function toggleUI(focused) {
+    const nav = document.getElementById('bottom-nav');
+    if (focused) nav.classList.add('ui-hidden');
+    else setTimeout(() => nav.classList.remove('ui-hidden'), 200);
+}
+
+function renderCards() {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = '';
+    
+    if (savedRecords.length === 0) {
+        container.innerHTML = `
+            <div class="glass-box" style="text-align:center; padding: 40px;" onclick="openFile(-1)">
+                <div style="font-size:50px; margin-bottom:10px;">+</div>
+                <b>Создать первый список</b>
+            </div>`;
+    } else {
+        savedRecords.forEach((rec, index) => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            card.onclick = () => openFile(index);
+            card.innerHTML = `
+                <div style="opacity:0.6; font-size:14px;">${rec.date}</div>
+                <div class="card-sum">${rec.total} RUB</div>
+                <button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
+            `;
+            container.appendChild(card);
+        });
     }
 }
 
-function toggleUI(f) {
-    const nav = document.getElementById('bottom-nav');
-    if (f) nav.classList.add('ui-hidden');
-    else setTimeout(() => nav.classList.remove('ui-hidden'), 150);
+function deleteCard(idx, e) {
+    e.stopPropagation();
+    tg.showConfirm("Удалить этот список?", (ok) => {
+        if(ok) {
+            savedRecords.splice(idx, 1);
+            localStorage.setItem('money_logs', JSON.stringify(savedRecords));
+            renderCards();
+        }
+    });
 }
 
 function handleGlobalClick(e) {
     if (e.target.tagName !== 'INPUT') document.activeElement.blur();
 }
 
-function clearData() {
-    if(confirm("Стереть всё?")) { localStorage.clear(); location.reload(); }
-}
-
+// Запуск
 renderCards();
