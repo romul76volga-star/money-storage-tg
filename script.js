@@ -1,7 +1,9 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Управление UI при вводе
+let currentEditingId = null; // Храним ID редактируемой записи
+
+// UI логика
 function toggleUI(isFocused, element = null) {
     const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
@@ -12,9 +14,7 @@ function toggleUI(isFocused, element = null) {
         bottomNav.classList.add('v-hide');
         if (scrollContainer) scrollContainer.classList.add('full-height');
         if (element) {
-            setTimeout(() => {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
+            setTimeout(() => element.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
         }
     } else {
         setTimeout(() => {
@@ -27,11 +27,13 @@ function toggleUI(isFocused, element = null) {
     }
 }
 
-// Навигация
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    const screen = document.getElementById(id);
+    screen.classList.add('active');
     
+    if (id !== 'screen-counter') currentEditingId = null; // Сброс ID если ушли со счетчика
+
     const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('header-title').innerText = titles[id];
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
@@ -48,19 +50,19 @@ function moveIndicator(idx) {
     document.getElementById('tab-indicator').style.left = pos[idx];
 }
 
-// Счетчик
-function createNewRow() {
+// Работа со списком
+function createNewRow(name = '', price = '') {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
+        <input type="text" placeholder="товар..." class="item-name" value="${name}" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
+        <input type="number" placeholder="0" class="item-price" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
     `;
     container.appendChild(div);
 
-    const priceInput = div.querySelector('.item-price');
-    priceInput.addEventListener('keydown', (e) => {
+    const pInput = div.querySelector('.item-price');
+    pInput.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             e.preventDefault();
             createNewRow();
@@ -78,101 +80,110 @@ function updateTotal() {
     document.getElementById('total-value').innerText = t;
 }
 
-// Логика сохранения
+// Сохранение и Удаление
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     if (total === "0") return;
     document.getElementById('modal-total-value').innerText = total;
+    
+    const hint = document.getElementById('modal-hint');
+    hint.innerText = currentEditingId ? "✕ удалит эту запись" : "✕ сбросит текущий ввод";
+    
     document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
-function cancelSave() {
-    document.getElementById('modal-overlay').classList.add('hidden');
-    clearCounter();
-    showScreen('screen-home', document.querySelector('.tab-item'), 0);
-}
-
 function confirmSave() {
-    const total = document.getElementById('total-value').innerText;
     const items = [];
     document.querySelectorAll('.input-row').forEach(row => {
-        const name = row.querySelector('.item-name').value;
-        const price = row.querySelector('.item-price').value;
-        if (name || price) items.push({ name, price });
+        const n = row.querySelector('.item-name').value;
+        const p = row.querySelector('.item-price').value;
+        if (n || p) items.push({ name: n, price: p });
     });
 
-    const saveData = {
-        id: Date.now(),
-        date: new Date().toLocaleDateString('ru-RU'),
-        total: total,
-        items: items
-    };
+    let history = JSON.parse(localStorage.getItem('money_history') || '[]');
+    
+    if (currentEditingId) {
+        // Обновляем существующую
+        const idx = history.findIndex(x => x.id === currentEditingId);
+        if (idx !== -1) {
+            history[idx].total = document.getElementById('total-value').innerText;
+            history[idx].items = items;
+        }
+    } else {
+        // Создаем новую
+        history.push({
+            id: Date.now(),
+            date: new Date().toLocaleDateString('ru-RU'),
+            total: document.getElementById('total-value').innerText,
+            items: items
+        });
+    }
 
-    const history = JSON.parse(localStorage.getItem('money_history') || '[]');
-    history.push(saveData);
     localStorage.setItem('money_history', JSON.stringify(history));
+    finishAction();
+}
 
-    tg.HapticFeedback.notificationOccurred('success');
+function cancelSave() {
+    if (currentEditingId) {
+        // Если мы редактировали файл и нажали крестик - удаляем его
+        let history = JSON.parse(localStorage.getItem('money_history') || '[]');
+        history = history.filter(x => x.id !== currentEditingId);
+        localStorage.setItem('money_history', JSON.stringify(history));
+    }
+    finishAction();
+}
+
+function finishAction() {
     document.getElementById('modal-overlay').classList.add('hidden');
-    clearCounter();
+    document.getElementById('items-list').innerHTML = '';
+    document.getElementById('total-value').innerText = '0';
+    currentEditingId = null;
+    createNewRow();
     renderCards();
     showScreen('screen-home', document.querySelector('.tab-item'), 0);
 }
 
-function clearCounter() {
-    document.getElementById('items-list').innerHTML = '';
-    document.getElementById('total-value').innerText = '0';
-    createNewRow();
-}
-
 function renderCards() {
     const container = document.getElementById('cards-container');
+    const screenHome = document.getElementById('screen-home');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
     container.innerHTML = '';
 
     if (history.length === 0) {
+        screenHome.classList.add('empty');
         container.innerHTML = `
-            <div class="center-content" id="empty-home">
+            <div class="center-content">
                 <button class="add-btn-glass" onclick="showScreen('screen-counter')"><img src="assets/plus.png"></button>
                 <div class="bold-label">добавить</div>
             </div>`;
     } else {
-        history.reverse().forEach(data => {
+        screenHome.classList.remove('empty');
+        [...history].reverse().forEach(data => {
             const card = document.createElement('div');
             card.className = 'save-card';
             card.onclick = () => loadSavedData(data);
             card.innerHTML = `<div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
             container.appendChild(card);
         });
-        // Доп. кнопка добавления в конце
-        const addBtn = document.createElement('div');
-        addBtn.className = 'save-card';
-        addBtn.style.background = 'var(--glass)';
-        addBtn.style.border = '2px dashed white';
-        addBtn.style.alignItems = 'center';
-        addBtn.style.justifyContent = 'center';
-        addBtn.innerHTML = '<span style="font-size:40px">+</span>';
-        addBtn.onclick = () => showScreen('screen-counter');
-        container.appendChild(addBtn);
+        const addCard = document.createElement('div');
+        addCard.className = 'save-card center-content';
+        addCard.style.background = 'var(--glass)';
+        addCard.style.border = '2px dashed white';
+        addCard.innerHTML = '<span style="font-size:40px">+</span>';
+        addCard.onclick = () => showScreen('screen-counter');
+        container.appendChild(addCard);
     }
 }
 
 function loadSavedData(data) {
+    currentEditingId = data.id;
     document.getElementById('items-list').innerHTML = '';
-    data.items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'input-row';
-        div.innerHTML = `
-            <input type="text" value="${item.name}" class="item-name" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-            <input type="number" value="${item.price}" class="item-price" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-        `;
-        document.getElementById('items-list').appendChild(div);
-    });
+    data.items.forEach(item => createNewRow(item.name, item.price));
     updateTotal();
     showScreen('screen-counter');
 }
 
-// Конвертер и прочее
+// Конвертер
 async function convertCurrency() {
     const val = document.getElementById('conv-input').value;
     const f = document.getElementById('from-code').innerText;
@@ -194,7 +205,7 @@ function selectCurr(f, c) {
     closePicker(); convertCurrency();
 }
 
-// Старт
+// Инит
 createNewRow();
 renderCards();
 if(tg.initDataUnsafe?.user) {
