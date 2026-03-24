@@ -42,12 +42,12 @@
             <div class="converter-wrap">
                 <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
                 <div class="currency-row">
-                    <div class="curr-select" onclick="openPicker('from')">
+                    <div class="curr-select glass-border" onclick="openPicker('from')">
                         <div id="from-flag">🇷🇺</div>
                         <div id="from-code">RUB</div>
                     </div>
-                    <img src="assets/swap.png" class="swap-icon">
-                    <div class="curr-select" onclick="openPicker('to')">
+                    <img src="assets/swap.png" class="swap-icon white-icon">
+                    <div class="curr-select glass-border" onclick="openPicker('to')">
                         <div id="to-flag">🇺🇸</div>
                         <div id="to-code">USD</div>
                     </div>
@@ -56,7 +56,7 @@
             </div>
             
             <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
-                <div class="picker-card" onclick="event.stopPropagation()">
+                <div class="picker-card">
                     <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
                     <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
                     <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
@@ -70,7 +70,7 @@
                 <div id="user-avatar" class="avatar-big"></div>
                 <h2 id="user-name">Загрузка...</h2>
                 <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.1.0</span></div>
+                    <div class="s-row"><span>Версия</span><span>1.1.2</span></div>
                     <div class="s-row" onclick="clearData()"><span>Сбросить данные</span><span style="color:#ff453a">→</span></div>
                 </div>
             </div>
