@@ -3,12 +3,20 @@ tg.expand();
 
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
+let exchangeRates = {};
 
+// ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
+    const titles = { 
+        'screen-home': 'Главная', 
+        'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 
+        'screen-settings': 'Профиль' 
+    };
+    
     document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
@@ -23,6 +31,7 @@ function showScreen(id, el, idx) {
     if (id === 'screen-home') renderCards();
 }
 
+// ЛОГИКА СЧЕТЧИКА
 function openFile(index) {
     currentEditingIndex = index;
     const list = document.getElementById('items-list');
@@ -84,7 +93,6 @@ function renderCards() {
     const container = document.getElementById('cards-container');
     if (!container) return;
     container.innerHTML = '';
-    
     const addCard = document.createElement('div');
     addCard.className = 'history-card';
     addCard.style.border = '2px dashed rgba(255,255,255,0.3)';
@@ -116,7 +124,50 @@ function deleteCard(idx, e) {
     });
 }
 
-// СКРЫТИЕ ПЛАШЕК ПРИ КЛАВИАТУРЕ
+// ЛОГИКА КОНВЕРТЕРА
+async function fetchRates() {
+    const rateDisplay = document.getElementById('current-rate-display');
+    const timeDisplay = document.getElementById('rate-update-time');
+    try {
+        rateDisplay.innerText = "обновление...";
+        const response = await fetch(`https://open.er-api.com/v6/latest/USD`);
+        const data = await response.json();
+        if (data && data.result === "success") {
+            exchangeRates = data.rates;
+            timeDisplay.innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
+            convertCurrency();
+        }
+    } catch (error) {
+        rateDisplay.innerText = "Ошибка сети";
+    }
+}
+
+function convertCurrency() {
+    const fromAmt = parseFloat(document.getElementById('from-amount').value);
+    const fromCur = document.getElementById('from-currency').value;
+    const toCur = document.getElementById('to-currency').value;
+    const toInput = document.getElementById('to-amount');
+    const rateDisplay = document.getElementById('current-rate-display');
+
+    if (!exchangeRates[fromCur] || isNaN(fromAmt)) return;
+
+    const res = (fromAmt / exchangeRates[fromCur]) * exchangeRates[toCur];
+    toInput.value = res.toFixed(2);
+    
+    const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
+    rateDisplay.innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
+}
+
+function swapCurrencies() {
+    const from = document.getElementById('from-currency');
+    const to = document.getElementById('to-currency');
+    const temp = from.value;
+    from.value = to.value;
+    to.value = temp;
+    convertCurrency();
+}
+
+// ИНТЕРФЕЙС
 function toggleUI(focused) {
     const nav = document.getElementById('bottom-nav');
     const controls = document.getElementById('counter-controls');
@@ -124,7 +175,6 @@ function toggleUI(focused) {
         nav.style.display = 'none';
         if (controls) controls.style.display = 'none';
     } else {
-        // Задержка, чтобы элементы не прыгали раньше времени
         setTimeout(() => {
             nav.style.display = 'flex';
             if (controls) controls.style.display = 'block';
@@ -142,4 +192,8 @@ function clearData() {
     });
 }
 
-renderCards();
+// СТАРТ
+window.onload = () => {
+    renderCards();
+    fetchRates();
+};
