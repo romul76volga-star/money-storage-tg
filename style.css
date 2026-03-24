@@ -10,76 +10,114 @@
 body { 
     background: var(--bg); 
     font-family: -apple-system, sans-serif; 
-    margin: 0; color: white; height: 100vh; 
-    display: flex; flex-direction: column; overflow: hidden; 
+    margin: 0; 
+    color: white; 
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
 }
 
+/* ШАПКА */
 .main-header {
     background: var(--dark-green);
-    height: 70px; display: flex; align-items: center; justify-content: space-between;
-    padding: 0 20px; flex-shrink: 0; z-index: 10;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 #app-content { flex: 1; position: relative; overflow: hidden; }
 
-.screen { display: none !important; height: 100%; padding: 20px; overflow-y: auto; }
+.screen { 
+    display: none !important; 
+    height: 100%; 
+    padding: 20px; 
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch;
+}
 .screen.active { display: flex !important; flex-direction: column; }
 
-/* Планка добавления в счетчике */
+/* ПЛАНКА ДОБАВЛЕНИЯ (ПЛЮСИК) */
 .add-row-bar {
     background: var(--glass);
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+    border: 1px dashed white;
     backdrop-filter: blur(5px);
-    height: 50px; border-radius: 15px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px; border: 1px dashed white;
-    font-size: 24px; flex-shrink: 0;
+}
+.add-row-bar span { font-size: 30px; line-height: 0; }
+
+/* МОДАЛЬНОЕ ОКНО (НА ВЕСЬ ЭКРАН) */
+#modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: none; /* Управляется через JS */
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: var(--glass);
+    border: 1px solid white;
+    border-radius: 30px;
+    width: 80%;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+.close-modal {
+    position: absolute;
+    top: 15px; right: 15px;
+    font-size: 24px;
+    color: white;
 }
 
+/* КАРТОЧКИ И ГЛАВНАЯ */
+.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 120px; }
+.save-card { 
+    background: var(--dark-green); border-radius: 25px; padding: 20px; 
+    height: 130px; position: relative; display: flex; flex-direction: column; justify-content: space-between;
+}
+.save-card.dashed { border: 2px dashed white; background: none; justify-content: center; align-items: center; font-size: 40px; }
+.delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 18px; }
+
+/* СЧЕТЧИК */
 .scroll-container { flex: 1; padding-bottom: 140px; }
 .input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
 .item-name { flex: 1; background: white; border: none; border-radius: 15px; padding: 15px; height: 50px; color: #333; }
 .item-price { position: absolute; right: 5px; width: 70px; height: 40px; background: var(--dark-green); color: white; border: none; border-radius: 12px; text-align: center; font-weight: bold; }
 
-/* Модальное окно сохранения */
-.modal-overlay { 
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
-    backdrop-filter: blur(10px); z-index: 2000; 
-    display: none; align-items: center; justify-content: center; 
+.total-container { 
+    background: var(--yellow); color: #333; padding: 15px; border-radius: 20px; 
+    position: fixed; bottom: 90px; left: 15px; right: 15px; text-align: center;
+    transition: 0.2s; z-index: 100;
 }
-.modal-card { 
-    width: 80%; background: var(--glass); border: 1px solid white;
-    border-radius: 30px; padding: 30px; text-align: center; 
-}
-.modal-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 24px; margin: 10px; cursor: pointer; }
-.modal-btn.confirm { background: var(--yellow); color: #333; }
-.modal-btn.cancel { background: none; border: 1px solid white; color: white; }
+.total-container.on-keyboard { bottom: 10px !important; }
 
-/* Таб-бар исправленный */
+/* ТАБ-БАР (УВЕЛИЧЕННЫЙ) */
 .tab-bar { 
-    height: 85px; background: var(--dark-green); 
+    height: 80px; background: var(--dark-green); 
     display: flex; justify-content: space-around; align-items: center; 
-    flex-shrink: 0; position: relative; padding-bottom: 15px;
+    flex-shrink: 0; position: relative;
+    padding-bottom: env(safe-area-inset-bottom);
 }
-.tab-item { z-index: 5; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; }
-.tab-item img { width: 32px; height: 32px; filter: brightness(0) invert(1); opacity: 0.5; transition: 0.3s; }
-.tab-item.active img { opacity: 1; transform: scale(1.1); }
-
+.tab-item img { width: 30px; height: 30px; filter: brightness(0) invert(1); opacity: 0.5; }
+.tab-item.active img { opacity: 1; }
 #tab-indicator { 
     position: absolute; width: 55px; height: 55px; 
     background: var(--glass); border-radius: 50%; 
-    top: 10px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    top: 12px; transition: 0.3s; z-index: 0; 
 }
 
-/* Конвертер старый стиль */
-#conv-input { width: 100%; background: none; border: none; color: white; font-size: 60px; text-align: center; font-weight: 800; margin-top: 20px; }
-.currency-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 30px 0; }
-.curr-select { background: var(--glass); padding: 12px 20px; border-radius: 18px; display: flex; gap: 8px; border: 1px solid rgba(255,255,255,0.2); }
-#conv-result { font-size: 48px; font-weight: 900; color: var(--yellow); text-align: center; }
-
-.total-container { 
-    background: var(--yellow); color: #333; padding: 15px; border-radius: 20px; 
-    position: fixed; bottom: 105px; left: 15px; right: 15px; text-align: center; z-index: 100;
-}
-.on-keyboard { bottom: 10px !important; }
 .hidden { display: none !important; }
-.v-hide { display: none !important; }
+.v-hide { visibility: hidden; pointer-events: none; }
