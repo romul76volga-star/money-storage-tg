@@ -2,29 +2,23 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
+let currentEditingIndex = -1;
 
 function showScreen(id, el, idx) {
-    // 1. Скрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    
-    // 2. Показываем нужный
     const target = document.getElementById(id);
     if (target) target.classList.add('active');
     
-    // 3. Заголовок и галочка
     const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('screen-title').innerText = titles[id] || '';
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
-    // 4. Индикатор меню
     if (idx !== undefined) {
         const positions = ['16.5%', '50%', '83.5%'];
-        const indicator = document.getElementById('tab-indicator');
-        indicator.style.left = positions[idx];
-        indicator.style.transform = 'translateX(-50%)';
+        document.getElementById('tab-indicator').style.left = positions[idx];
+        document.getElementById('tab-indicator').style.transform = 'translateX(-50%)';
     }
 
-    // 5. Активная иконка
     if (el) {
         document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
@@ -38,17 +32,16 @@ function renderCards() {
     container.innerHTML = '';
 
     if (savedRecords.length === 0) {
-        // ВИД 1: Круглая кнопка
         container.innerHTML = `
-            <div class="first-add-wrapper" onclick="showScreen('screen-counter', null, 1)">
-                <div class="big-circle-btn">+</div>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:60vh;" onclick="openFile(-1)">
+                <div style="width:100px; height:100px; border:2px solid white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:50px; margin-bottom:10px;">+</div>
                 <div style="font-weight:bold;">добавить</div>
             </div>`;
     } else {
-        // ВИД 2: Файлы + кнопка-рамка
         savedRecords.forEach((rec, index) => {
             const card = document.createElement('div');
             card.className = 'history-card';
+            card.onclick = () => openFile(index);
             card.innerHTML = `
                 <div class="card-date">${rec.date}</div>
                 <div class="card-sum">${rec.total} RUB</div>
@@ -56,76 +49,98 @@ function renderCards() {
             `;
             container.appendChild(card);
         });
-
-        const addPlate = document.createElement('div');
-        addPlate.className = 'mini-add-plate';
-        addPlate.innerHTML = '+';
-        addPlate.onclick = () => showScreen('screen-counter', null, 1);
-        container.appendChild(addPlate);
+        
+        const addBtn = document.createElement('div');
+        addBtn.className = 'add-box-border';
+        addBtn.style.height = '100px';
+        addBtn.innerHTML = '+';
+        addBtn.onclick = () => openFile(-1);
+        container.appendChild(addBtn);
     }
 }
 
-function deleteCard(index, event) {
-    event.stopPropagation();
-    if (confirm("Удалить этот файл?")) {
-        savedRecords.splice(index, 1);
-        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
-        renderCards();
-    }
-}
-
-function createNewRow() {
+function openFile(index) {
+    currentEditingIndex = index;
     const list = document.getElementById('items-list');
+    list.innerHTML = '';
+    
+    if (index === -1) {
+        createNewRow();
+        document.getElementById('total-value').innerText = '0';
+    } else {
+        const data = savedRecords[index];
+        data.items.forEach(item => {
+            const row = createRowElement(item.name, item.price);
+            list.appendChild(row);
+        });
+        updateTotal();
+    }
+    showScreen('screen-counter', null, 1);
+}
+
+function createRowElement(name = '', price = '') {
     const row = document.createElement('div');
     row.className = 'input-row';
     row.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name" onfocus="toggleUI(true)" onblur="toggleUI(false)">
-        <input type="number" class="item-price" placeholder="0" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+        <input type="text" placeholder="товар..." class="item-name" value="${name}" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+        <input type="number" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
     `;
-    list.appendChild(row);
-    list.scrollTop = list.scrollHeight;
+    return row;
+}
+
+function createNewRow() {
+    document.getElementById('items-list').appendChild(createRowElement());
 }
 
 function updateTotal() {
     let total = 0;
-    document.querySelectorAll('.item-price').forEach(input => {
-        total += Number(input.value) || 0;
-    });
+    document.querySelectorAll('.item-price').forEach(i => total += Number(i.value) || 0);
     document.getElementById('total-value').innerText = total;
 }
 
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
-    if (total > 0) {
-        savedRecords.unshift({
-            date: new Date().toLocaleDateString(),
-            total: total
-        });
+    const items = [];
+    document.querySelectorAll('.input-row').forEach(row => {
+        const n = row.querySelector('.item-name').value;
+        const p = row.querySelector('.item-price').value;
+        if (n || p) items.push({ name: n, price: p });
+    });
+
+    if (items.length > 0) {
+        const record = { 
+            date: currentEditingIndex === -1 ? new Date().toLocaleDateString() : savedRecords[currentEditingIndex].date, 
+            total, items 
+        };
+        if (currentEditingIndex === -1) savedRecords.unshift(record);
+        else savedRecords[currentEditingIndex] = record;
+        
         localStorage.setItem('money_logs', JSON.stringify(savedRecords));
-        document.getElementById('items-list').innerHTML = '';
-        document.getElementById('total-value').innerText = '0';
-        createNewRow();
         showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
     }
 }
 
-function toggleUI(isFocused) {
-    const nav = document.getElementById('bottom-nav');
-    if (isFocused) nav.classList.add('ui-hidden');
-    else setTimeout(() => nav.classList.remove('ui-hidden'), 100);
+function deleteCard(idx, e) {
+    e.stopPropagation();
+    if (confirm("Удалить файл?")) {
+        savedRecords.splice(idx, 1);
+        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
+        renderCards();
+    }
 }
 
-function clearData() {
-    if(confirm("Очистить все записи?")) {
-        localStorage.clear();
-        location.reload();
-    }
+function toggleUI(f) {
+    const nav = document.getElementById('bottom-nav');
+    if (f) nav.classList.add('ui-hidden');
+    else setTimeout(() => nav.classList.remove('ui-hidden'), 150);
 }
 
 function handleGlobalClick(e) {
     if (e.target.tagName !== 'INPUT') document.activeElement.blur();
 }
 
-// Инициализация
-createNewRow();
+function clearData() {
+    if(confirm("Стереть всё?")) { localStorage.clear(); location.reload(); }
+}
+
 renderCards();
