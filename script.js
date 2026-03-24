@@ -1,3 +1,7 @@
+// Инициализация Telegram Mini App
+const tg = window.Telegram.WebApp;
+tg.expand(); // Развернуть на весь экран
+
 function showScreen(screenId, el) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
@@ -8,27 +12,31 @@ function showScreen(screenId, el) {
     }
 }
 
-// Добавление новой строки
+// Управление строками
 function createNewRow() {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name">
-        <input type="number" placeholder="цена" class="item-price" oninput="updateTotal()">
+        <input type="text" placeholder="Товар..." class="item-name">
+        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()">
     `;
     container.appendChild(div);
 
-    const inputs = div.querySelectorAll('input');
-    inputs[1].addEventListener('keydown', (e) => {
+    const priceInput = div.querySelector('.item-price');
+    priceInput.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             createNewRow();
-            container.scrollTo(0, container.scrollHeight);
+            // Фокусируемся на новом поле товара (следующем элементе)
+            setTimeout(() => {
+                const rows = document.querySelectorAll('.item-name');
+                rows[rows.length - 1].focus();
+            }, 10);
         }
     });
 }
 
-// Первая строка при загрузке
+// Создаем первую строку при запуске
 createNewRow();
 
 function updateTotal() {
@@ -39,27 +47,40 @@ function updateTotal() {
     document.getElementById('total-value').innerText = total;
 }
 
-// Конвертер (заглушка с реальной логикой)
-async function convertCurrency() {
-    const amount = document.getElementById('conv-input').value;
-    // В реальности тут будет fetch к API курсов
-    const rate = 0.011; // Пример: RUB в USD
-    document.getElementById('conv-result').innerText = (amount * rate).toFixed(2) + " USD";
-}
-
+// Сохранение и главный экран
 function saveAndHome() {
-    // Логика сохранения (сохраняем в localStorage)
     const total = document.getElementById('total-value').innerText;
-    localStorage.setItem('lastTotal', total);
+    if (total == 0) return;
+
+    localStorage.setItem('savedSum', total);
     
-    // Показываем на главном экране
+    const savedView = document.getElementById('saved-data-view');
     document.getElementById('empty-view').classList.add('hidden');
-    document.getElementById('saved-data-view').classList.remove('hidden');
-    document.getElementById('saved-data-view').innerHTML = `
-        <div class="glass" style="padding:20px; text-align:center;">
-            <h3>Последний расход</h3>
-            <h1>${total} ₽</h1>
+    savedView.classList.remove('hidden');
+    
+    savedView.innerHTML = `
+        <div class="glass" style="padding: 30px; text-align: center; width: 100%;">
+            <p style="margin:0; opacity:0.8;">Ваш последний расчет</p>
+            <h1 style="font-size: 48px; margin: 10px 0;">${total} ₽</h1>
+            <button onclick="clearSave()" style="background:none; border:1px solid white; color:white; border-radius:10px; padding:5px 15px;">Сбросить</button>
         </div>
     `;
     showScreen('screen-home');
+}
+
+function clearSave() {
+    localStorage.removeItem('savedSum');
+    location.reload();
+}
+
+// Загрузка ника из Telegram
+if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+}
+
+// Простой конвертер (заглушка)
+function convertCurrency() {
+    const val = document.getElementById('conv-input').value;
+    const res = (val * 0.011).toFixed(2); // Примерный курс
+    document.getElementById('conv-result').innerText = `≈ ${res} USD`;
 }
