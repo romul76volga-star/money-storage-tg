@@ -7,7 +7,18 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body onclick="dismissKeyboard(event)">
+<body>
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card glass">
+            <div class="modal-total-label">СУММА ЗАТРАТ</div>
+            <div id="modal-total-value" class="modal-total-amount">0</div>
+            <div class="modal-actions">
+                <button class="modal-btn confirm" onclick="confirmSave()">✓</button>
+                <button class="modal-btn cancel" onclick="cancelSave()">✕</button>
+            </div>
+        </div>
+    </div>
+
     <div id="app">
         <header class="main-header">
             <span id="header-title">Главная</span>
@@ -15,16 +26,11 @@
         </header>
 
         <section id="screen-home" class="screen active">
-            <div class="center-content">
-                <button class="add-btn-glass" onclick="showScreen('screen-counter')">
-                    <img src="assets/plus.png" class="white-icon" alt="+">
-                </button>
-                <div class="bold-label">добавить</div>
-            </div>
-            <div id="saved-data-view" class="hidden center-content"></div>
+            <div id="cards-container" class="cards-grid">
+                </div>
         </section>
 
-        <section id="screen-counter" class="screen full-width-screen">
+        <section id="screen-counter" class="screen">
             <div id="items-list" class="scroll-container"></div>
             <div id="total-bar" class="total-container">
                 <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
@@ -34,15 +40,15 @@
 
         <section id="screen-converter" class="screen">
             <div class="converter-wrap">
-                <input type="number" id="conv-input" value="100" oninput="convertCurrency()" onfocus="setFocus(true)" onblur="setFocus(false)">
+                <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
                 <div class="currency-row">
                     <div class="curr-select glass-border" onclick="openPicker('from')">
-                        <div class="curr-top-flag" id="from-flag">🇷🇺</div>
+                        <div id="from-flag">🇷🇺</div>
                         <div id="from-code">RUB</div>
                     </div>
                     <img src="assets/swap.png" class="swap-icon white-icon">
                     <div class="curr-select glass-border" onclick="openPicker('to')">
-                        <div class="curr-top-flag" id="to-flag">🇺🇸</div>
+                        <div id="to-flag">🇺🇸</div>
                         <div id="to-code">USD</div>
                     </div>
                 </div>
@@ -50,7 +56,7 @@
             </div>
             
             <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
-                <div class="picker-card" onclick="event.stopPropagation()">
+                <div class="picker-card">
                     <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
                     <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
                     <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
@@ -64,7 +70,7 @@
                 <div id="user-avatar" class="avatar-big"></div>
                 <h2 id="user-name">Загрузка...</h2>
                 <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.0.8</span></div>
+                    <div class="s-row"><span>Версия</span><span>1.1.2</span></div>
                     <div class="s-row" onclick="clearData()"><span>Сбросить данные</span><span style="color:#ff453a">→</span></div>
                 </div>
             </div>
