@@ -1,56 +1,148 @@
-:root { --bg: #7a8a7c; --dark-green: #5d6b5e; --yellow: #f2e4b4; --glass: rgba(255, 255, 255, 0.2); }
-body { background: var(--bg); margin: 0; color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-family: sans-serif; }
-
-/* Фикс меню */
-.tab-bar { 
-    position: fixed; bottom: 0; width: 100%; height: 75px; 
-    background: var(--dark-green); display: flex; justify-content: space-around; 
-    align-items: center; z-index: 1000; padding-bottom: 10px;
-}
-.ui-hidden { display: none !important; }
-
-.tab-item img { width: 28px; height: 28px; filter: brightness(0) invert(1); opacity: 0.5; position: relative; z-index: 5; }
-.tab-item.active img { opacity: 1; }
-
-#tab-indicator { 
-    position: absolute; width: 50px; height: 50px; 
-    background: var(--glass); border-radius: 50%; 
-    transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
-    top: 8px; left: 16.5%; 
+:root {
+    --bg: #7a8a7c;
+    --header-dark: #5d6b5e;
+    --yellow: #f2e4b4;
+    --glass: rgba(255, 255, 255, 0.2);
+    --glass-heavy: rgba(255, 255, 255, 0.4);
 }
 
-/* СТИЛЬ СТРОК (Твой оригинальный) */
-.input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
-.item-name { 
-    flex: 1; background: white; border: none; border-radius: 15px; 
-    padding: 15px; height: 50px; color: #333; outline: none; font-size: 16px;
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); margin: 0; color: white; font-family: sans-serif; height: 100vh; overflow: hidden; }
+
+/* Темно-зеленый квадрат/хедер сверху (Скрин 1) */
+.app-header {
+    background: var(--header-dark);
+    height: 70px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
+.header-content { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 22px; font-weight: bold; }
+
+/* Квадратная галочка как на скрине */
+.header-check-btn {
+    background: white;
+    width: 38px;
+    height: 28px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Скролл-контейнеры */
+.scroll-wrapper, .scroll-wrapper-rows {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.scroll-wrapper-rows { max-height: calc(100vh - 320px); } /* Ограничение для скролла строк */
+
+/* Плашка добавления из Скрина 1 */
+.add-row-trigger {
+    padding: 0 20px;
+    margin-top: 10px;
+}
+.add-box-border {
+    border: 2px solid white;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: 100;
+}
+
+/* Файлы (скругленные квадраты) */
+.history-card {
+    background: var(--glass);
+    border-radius: 25px;
+    padding: 25px;
+    position: relative;
+    min-height: 120px;
+}
+.card-date { font-size: 16px; opacity: 0.9; }
+.card-sum { font-size: 28px; font-weight: bold; margin-top: 10px; }
+
+/* Полупрозрачный крестик */
+.del-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--glass);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* Входная кнопка (первый раз) */
+.first-add-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+}
+.big-circle-btn {
+    width: 100px;
+    height: 100px;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+/* Кнопка добавить (когда файлы уже есть - Скрин 2) */
+.mini-add-plate {
+    border: 2px dashed rgba(255,255,255,0.5);
+    border-radius: 25px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+/* Строка ввода */
+.input-row { display: flex; position: relative; }
+.item-name { flex: 1; border-radius: 15px; border: none; padding: 15px; font-size: 16px; height: 55px; }
 .item-price { 
-    position: absolute; right: 5px; width: 75px; height: 42px; 
-    background: var(--dark-green); color: white; border: none; 
-    border-radius: 12px; text-align: center; font-weight: bold; outline: none;
+    position: absolute; right: 5px; top: 5px; bottom: 5px; 
+    width: 80px; background: var(--header-dark); border-radius: 12px; 
+    border: none; color: white; text-align: center; font-weight: bold;
 }
 
-/* Кнопка на главной */
-.add-btn-container { text-align: center; margin-top: 40px; }
-.add-btn-glass { 
-    width: 80px; height: 80px; border-radius: 50%; border: 2px solid white;
-    background: none; color: white; font-size: 40px; margin-bottom: 10px;
+/* Итоговая панель */
+.total-plate {
+    background: var(--yellow);
+    margin: 20px;
+    padding: 20px;
+    border-radius: 25px;
+    text-align: center;
+    color: #333;
 }
+.total-sum { font-size: 30px; font-weight: bold; }
 
-/* Карточки с удалением */
-.history-card { 
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 15px; margin: 10px 0; border-radius: 15px; background: var(--glass);
-}
-.del-card-btn { background: #ff4d4d; border: none; color: white; border-radius: 50%; width: 24px; height: 24px; }
+/* Навигация */
+.tab-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--header-dark); display: flex; justify-content: space-around; align-items: center; }
+.tab-item img { width: 26px; filter: brightness(0) invert(1); opacity: 0.5; }
+.tab-item.active img { opacity: 1; }
+#tab-indicator { position: absolute; top: 10px; width: 45px; height: 45px; background: var(--glass); border-radius: 50%; transition: 0.3s; }
 
-/* Общие стили */
-.screen { display: none; flex: 1; padding: 20px; overflow-y: auto; }
-.screen.active { display: flex; flex-direction: column; }
-.total-container { 
-    background: var(--yellow); color: #333; padding: 15px; 
-    border-radius: 20px; position: fixed; bottom: 95px; left: 20px; right: 20px; text-align: center; 
-}
 .hidden { display: none !important; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.ui-hidden { display: none !important; }
