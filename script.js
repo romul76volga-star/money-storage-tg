@@ -5,14 +5,18 @@ let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 
 function showScreen(id, el, idx) {
+    // Скрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
+    // Обновляем заголовок
     const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
-    document.getElementById('screen-title').innerText = titles[id];
+    document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
+    
+    // Показываем галочку только в счетчике
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
-    // Перемещаем кружок только если переключение идет через меню
+    // Управление индикатором (кружком) в меню
     if (idx !== undefined) {
         const positions = ['16.5%', '50%', '83.5%'];
         const indicator = document.getElementById('tab-indicator');
@@ -41,8 +45,8 @@ function openFile(index) {
         });
         updateTotal();
     }
-    // ВАЖНО: При открытии счетчика кружок ОСТАЕТСЯ на главной (индекс 0)
-    showScreen('screen-counter', null, 0); 
+    // Переходим в счетчик, но кружок в меню остается на "Главной" (индекс 0)
+    showScreen('screen-counter', null, 0);
 }
 
 function createRowElement(name = '', price = '') {
@@ -58,7 +62,8 @@ function createRowElement(name = '', price = '') {
 function createNewRow() {
     const list = document.getElementById('items-list');
     list.appendChild(createRowElement());
-    setTimeout(() => list.scrollTo({top: list.scrollHeight, behavior: 'smooth'}), 50);
+    // Скролл к новой строке
+    setTimeout(() => list.scrollTo({top: list.scrollHeight, behavior: 'smooth'}), 100);
 }
 
 function updateTotal() {
@@ -78,7 +83,7 @@ function saveAndHome() {
 
     if (items.length > 0) {
         const record = { 
-            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, 
+            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU') : savedRecords[currentEditingIndex].date, 
             total, items 
         };
         if (currentEditingIndex === -1) savedRecords.unshift(record);
@@ -93,13 +98,11 @@ function renderCards() {
     const container = document.getElementById('cards-container');
     container.innerHTML = '';
     
-    // Кнопка создания новой папки (тоже квадратная)
+    // Кнопка "+" для создания нового файла (тоже квадратная)
     const addCard = document.createElement('div');
-    addCard.className = 'history-card';
-    addCard.style.justifyContent = 'center';
-    addCard.style.alignItems = 'center';
+    addCard.className = 'history-card add-card-style';
     addCard.onclick = () => openFile(-1);
-    addCard.innerHTML = `<div style="font-size:40px; opacity:0.5;">+</div>`;
+    addCard.innerHTML = `<span>+</span>`;
     container.appendChild(addCard);
 
     savedRecords.forEach((rec, index) => {
@@ -107,18 +110,12 @@ function renderCards() {
         card.className = 'history-card';
         card.onclick = () => openFile(index);
         card.innerHTML = `
-            <div style="opacity:0.6; font-size:12px;">${rec.date}</div>
+            <div class="card-date">${rec.date}</div>
             <div class="card-sum">${rec.total} ₽</div>
             <button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
         `;
         container.appendChild(card);
     });
-}
-
-function toggleUI(focused) {
-    const nav = document.getElementById('bottom-nav');
-    if (focused) nav.classList.add('ui-hidden');
-    else setTimeout(() => nav.classList.remove('ui-hidden'), 200);
 }
 
 function deleteCard(idx, e) {
@@ -132,8 +129,26 @@ function deleteCard(idx, e) {
     });
 }
 
+function toggleUI(focused) {
+    const nav = document.getElementById('bottom-nav');
+    if (focused) nav.classList.add('ui-hidden');
+    else setTimeout(() => nav.classList.remove('ui-hidden'), 200);
+}
+
 function handleGlobalClick(e) {
     if (e.target.tagName !== 'INPUT') document.activeElement.blur();
 }
 
+function clearData() {
+    tg.showConfirm("Вы уверены, что хотите удалить ВСЕ данные?", (ok) => {
+        if(ok) {
+            localStorage.clear();
+            savedRecords = [];
+            renderCards();
+            showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
+        }
+    });
+}
+
+// Инициализация
 renderCards();
