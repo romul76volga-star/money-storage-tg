@@ -8,7 +8,6 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0; color: white; height: 100vh; overflow: hidden; }
 
-/* Шапка */
 .main-header {
     background: var(--dark-green); height: 80px; 
     display: flex; align-items: flex-end; justify-content: space-between;
@@ -16,22 +15,31 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 }
 #header-save { background: none; border: none; color: white; font-size: 30px; cursor: pointer; }
 
-/* Экраны */
 .screen { display: none; height: calc(100vh - 80px); position: relative; padding: 20px; }
 .screen.active { display: flex; flex-direction: column; }
 
-/* Центрирование первой кнопки на главной */
-#screen-home.empty { display: flex; align-items: center; justify-content: center; }
+/* ИСПРАВЛЕНИЕ ЦЕНТРА */
+#screen-home.empty { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+#screen-home.empty .cards-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
 
-/* Сетка карточек */
 .cards-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
     padding: 10px; overflow-y: auto; align-content: start; flex: 1;
 }
+
 .save-card {
     background: var(--dark-green); border-radius: 25px; padding: 20px;
     display: flex; flex-direction: column; height: 140px; justify-content: space-between;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 .card-date { font-size: 13px; opacity: 0.6; font-weight: 600; }
 .card-amount { font-size: 24px; font-weight: 900; }
@@ -44,10 +52,9 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .add-btn-glass img { width: 35px; height: 35px; filter: brightness(0) invert(1); }
 .bold-label { font-weight: 900; font-size: 20px; text-transform: lowercase; }
 
-/* Счетчик */
 .scroll-container { 
     overflow-y: auto; flex: 1; margin-bottom: 170px; padding-bottom: 20px; 
-    transition: all 0.2s; scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 .scroll-container.full-height { margin-bottom: 0px !important; padding-bottom: 80vh !important; }
 
@@ -55,14 +62,12 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .item-name { flex: 1; background: white; border: none; border-radius: 18px; padding: 18px 90px 18px 20px; font-size: 16px; color: #333; width: 100%; }
 .item-price { position: absolute; right: 6px; width: 80px; height: calc(100% - 12px); background: var(--dark-green); color: white; border: none; border-radius: 14px; text-align: center; font-weight: 800; font-size: 16px; }
 
-/* Итог */
 .total-container { 
     background: var(--yellow); color: #333; padding: 18px; border-radius: 25px; 
     text-align: center; position: absolute; bottom: 100px; left: 15px; right: 15px; z-index: 5;
 }
 .total-box { font-size: 36px; font-weight: 900; }
 
-/* Модальное окно (Плашка) */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
@@ -81,7 +86,6 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .modal-btn.confirm { background: var(--yellow); color: #333; }
 .modal-btn.cancel { background: none; border: 1px solid white; color: white; }
 
-/* Навигация */
 .tab-bar {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     width: 90%; height: 65px; background: rgba(0,0,0,0.4); border-radius: 40px;
