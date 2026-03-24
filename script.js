@@ -1,21 +1,17 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Умное скрытие интерфейса
 function toggleUI(isFocused, element = null) {
     const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
     const scrollContainer = document.querySelector('.scroll-container');
     
     if (isFocused) {
-        // Прячем элементы визуально
         if (totalBar) totalBar.classList.add('v-hide');
         bottomNav.classList.add('v-hide');
+        if (scrollContainer) scrollContainer.classList.add('full-height');
         
-        // Меняем геометрию списка
-        scrollContainer.classList.add('keyboard-open');
-        
-        // Скроллим к элементу, чтобы он был по центру
+        // Умный скролл к выбранной строке
         if (element) {
             setTimeout(() => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -26,7 +22,7 @@ function toggleUI(isFocused, element = null) {
             if (document.activeElement.tagName !== 'INPUT') {
                 if (totalBar) totalBar.classList.remove('v-hide');
                 bottomNav.classList.remove('v-hide');
-                scrollContainer.classList.remove('keyboard-open');
+                if (scrollContainer) scrollContainer.classList.remove('full-height');
             }
         }, 150);
     }
@@ -35,16 +31,9 @@ function toggleUI(isFocused, element = null) {
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    
-    const titles = { 
-        'screen-home': 'Главная', 
-        'screen-counter': 'Счетчик', 
-        'screen-converter': 'Конвертер', 
-        'screen-settings': 'Профиль' 
-    };
+    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('header-title').innerText = titles[id];
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
-
     if (idx !== undefined) moveIndicator(idx);
     if (el) {
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -76,14 +65,12 @@ function createNewRow() {
             createNewRow();
             setTimeout(() => {
                 const rows = document.querySelectorAll('.item-name');
-                const lastRow = rows[rows.length - 1];
-                lastRow.focus();
+                rows[rows.length - 1].focus();
             }, 50);
         }
     });
 }
 
-// Запуск первой строки
 createNewRow();
 
 function updateTotal() {
@@ -120,13 +107,8 @@ async function convertCurrency() {
     }
 }
 
-function openPicker(side) { 
-    window.pickingSide = side; 
-    document.getElementById('picker').classList.remove('hidden'); 
-}
-
+function openPicker(side) { window.pickingSide = side; document.getElementById('picker').classList.remove('hidden'); }
 function closePicker() { document.getElementById('picker').classList.add('hidden'); }
-
 function selectCurr(f, c) {
     const side = window.pickingSide;
     document.getElementById(`${side}-flag`).innerText = f;
@@ -135,7 +117,6 @@ function selectCurr(f, c) {
     convertCurrency();
 }
 
-// Данные профиля из TG
 if(tg.initDataUnsafe?.user) {
     document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
     if(tg.initDataUnsafe.user.photo_url) {
