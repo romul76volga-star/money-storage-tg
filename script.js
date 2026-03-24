@@ -3,30 +3,24 @@ tg.expand();
 
 // Переключение экранов
 function showScreen(id, el, idx) {
-    // Скрываем все экраны принудительно
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
     
-    // Показываем нужный
-    const target = document.getElementById(id);
-    if(target) target.classList.add('active');
-
-    // Заголовок и кнопка "Сохранить"
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-settings': 'Профиль' };
+    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('header-title').innerText = titles[id];
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
-    // Навигация
-    if(idx !== undefined) {
-        const positions = ['7.5%', '41%', '74.5%'];
-        document.getElementById('tab-indicator').style.left = positions[idx];
+    if (idx !== undefined) {
+        const pos = ['7.5%', '41%', '74.5%'];
+        document.getElementById('tab-indicator').style.left = pos[idx];
     }
-    if(el) {
+    if (el) {
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
     }
 }
 
-// Отрисовка главной
+// Отрисовка карточек
 function renderCards() {
     const container = document.getElementById('cards-container');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
@@ -35,8 +29,10 @@ function renderCards() {
     if (history.length === 0) {
         container.innerHTML = `
             <div class="empty-center">
-                <button class="add-circle" onclick="showScreen('screen-counter', null, 1)">+</button>
-                <div style="font-weight: bold; font-size: 20px">добавить</div>
+                <button class="add-btn-glass" onclick="showScreen('screen-counter', null, 1)">
+                    <img src="assets/plus.png">
+                </button>
+                <div style="font-weight: 900; font-size: 20px">добавить</div>
             </div>`;
     } else {
         // Кнопка "+" в сетке
@@ -45,45 +41,41 @@ function renderCards() {
         addCard.style.border = '2px dashed white';
         addCard.style.alignItems = 'center';
         addCard.style.justifyContent = 'center';
-        addCard.innerHTML = '<span style="font-size: 30px">+</span>';
+        addCard.innerHTML = '<span style="font-size:40px">+</span>';
         addCard.onclick = () => showScreen('screen-counter', null, 1);
         container.appendChild(addCard);
 
-        // Карточки истории
-        [...history].reverse().forEach(item => {
+        [...history].reverse().forEach(data => {
             const card = document.createElement('div');
             card.className = 'save-card';
-            card.innerHTML = `
-                <div style="font-size: 12px; opacity: 0.6">${item.date}</div>
-                <div style="font-size: 24px; font-weight: bold">${item.total}</div>
-            `;
+            card.innerHTML = `<div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
             container.appendChild(card);
         });
     }
 }
 
-// Логика счетчика
+// Счетчик
 function addRow() {
     const list = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="text" class="item-name" placeholder="Товар">
-        <input type="number" class="item-price" placeholder="0" oninput="calcTotal()">
+        <input type="text" placeholder="товар..." class="item-name">
+        <input type="number" placeholder="0" class="item-price" oninput="updateTotal()">
     `;
     list.appendChild(div);
 }
 
-function calcTotal() {
-    let sum = 0;
-    document.querySelectorAll('.item-price').forEach(p => sum += Number(p.value) || 0);
-    document.getElementById('total-value').innerText = sum;
+function updateTotal() {
+    let t = 0;
+    document.querySelectorAll('.item-price').forEach(i => t += Number(i.value) || 0);
+    document.getElementById('total-value').innerText = t;
 }
 
 // Сохранение
 function saveAndHome() {
     const val = document.getElementById('total-value').innerText;
-    if(val === "0") return;
+    if (val === "0") return;
     document.getElementById('modal-total-value').innerText = val;
     document.getElementById('modal-overlay').classList.remove('hidden');
 }
@@ -98,23 +90,39 @@ function confirmSave() {
     });
     localStorage.setItem('money_history', JSON.stringify(history));
     
-    // Сброс
     document.getElementById('items-list').innerHTML = '';
     addRow();
-    calcTotal();
+    updateTotal();
     renderCards();
     closeModal();
     showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
 }
 
-function clearData() {
-    if(confirm("Удалить всё?")) {
-        localStorage.clear();
-        location.reload();
-    }
+// Конвертер
+async function convertCurrency() {
+    const val = document.getElementById('conv-input').value;
+    const from = document.getElementById('from-code').innerText;
+    const to = document.getElementById('to-code').innerText;
+    try {
+        const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
+        const data = await res.json();
+        document.getElementById('conv-result').innerText = (val * data.rates[to]).toFixed(2);
+    } catch { document.getElementById('conv-result').innerText = "error"; }
 }
 
-// Старт
+function openPicker(side) { window.currentSide = side; document.getElementById('picker').classList.remove('hidden'); }
+function closePicker() { document.getElementById('picker').classList.add('hidden'); }
+function selectCurr(flag, code) {
+    document.getElementById(`${window.currentSide}-flag`).innerText = flag;
+    document.getElementById(`${window.currentSide}-code`).innerText = code;
+    closePicker(); convertCurrency();
+}
+
+function clearData() {
+    if(confirm("Удалить всё?")) { localStorage.clear(); location.reload(); }
+}
+
+// Инициализация
 addRow();
 renderCards();
 if(tg.initDataUnsafe?.user) {
