@@ -16,15 +16,15 @@
 
         <section id="screen-home" class="screen active">
             <div class="center-content">
-                <button class="add-btn-glass" onclick="showScreen('screen-counter', null, 1)">
-                    <img src="assets/plus.png" alt="+">
+                <button class="add-btn-glass" onclick="showScreen('screen-counter')">
+                    <img src="assets/plus.png" class="white-icon" alt="+">
                 </button>
                 <div class="bold-label">добавить</div>
             </div>
             <div id="saved-data-view" class="hidden center-content"></div>
         </section>
 
-        <section id="screen-counter" class="screen">
+        <section id="screen-counter" class="screen full-width-screen">
             <div id="items-list" class="scroll-container"></div>
             <div id="total-bar" class="total-container">
                 <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
@@ -36,12 +36,14 @@
             <div class="converter-wrap">
                 <input type="number" id="conv-input" value="100" oninput="convertCurrency()" onfocus="setFocus(true)" onblur="setFocus(false)">
                 <div class="currency-row">
-                    <div class="curr-select" onclick="openPicker('from')">
-                        <span id="from-flag">🇷🇺</span> <span id="from-code">RUB</span>
+                    <div class="curr-select glass-border" onclick="openPicker('from')">
+                        <div class="curr-top-flag" id="from-flag">🇷🇺</div>
+                        <div id="from-code">RUB</div>
                     </div>
-                    <img src="assets/swap.png" class="swap-icon">
-                    <div class="curr-select" onclick="openPicker('to')">
-                        <span id="to-flag">🇺🇸</span> <span id="to-code">USD</span>
+                    <img src="assets/swap.png" class="swap-icon white-icon">
+                    <div class="curr-select glass-border" onclick="openPicker('to')">
+                        <div class="curr-top-flag" id="to-flag">🇺🇸</div>
+                        <div id="to-code">USD</div>
                     </div>
                 </div>
                 <div id="conv-result">0.00</div>
@@ -60,9 +62,9 @@
         <section id="screen-settings" class="screen">
             <div class="profile-section">
                 <div id="user-avatar" class="avatar-big"></div>
-                <h2 id="user-name">Пользователь</h2>
+                <h2 id="user-name">Загрузка...</h2>
                 <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.0.5</span></div>
+                    <div class="s-row"><span>Версия</span><span>1.0.8</span></div>
                     <div class="s-row" onclick="clearData()"><span>Сбросить данные</span><span style="color:#ff453a">→</span></div>
                 </div>
             </div>
