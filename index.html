@@ -19,17 +19,17 @@
 
     <main id="app-content">
         <section id="screen-home" class="screen active">
-            <div id="cards-container" class="scroll-wrapper"></div>
+            <div id="cards-container" class="cards-grid scrollable-area">
+                </div>
         </section>
 
         <section id="screen-counter" class="screen">
             <div class="counter-layout">
-                <div id="items-list" class="scroll-wrapper-rows"></div>
+                <div id="items-list" class="scrollable-area rows-padding">
+                    </div>
                 
                 <div class="add-row-trigger" onclick="createNewRow()">
-                    <div class="add-box-border">
-                        <span>+</span>
-                    </div>
+                    <div class="add-box-border"><span>+</span></div>
                 </div>
 
                 <div id="total-bar" class="total-plate">
@@ -40,16 +40,13 @@
         </section>
 
         <section id="screen-converter" class="screen">
-            <div class="scroll-wrapper">
-                <div class="glass-box">
-                    <h3>Конвертер</h3>
-                    <p>Раздел в разработке</p>
-                </div>
+            <div class="scrollable-area rows-padding">
+                <div class="glass-box"><h3>Конвертер</h3><p>В разработке</p></div>
             </div>
         </section>
 
         <section id="screen-settings" class="screen">
-            <div class="scroll-wrapper">
+            <div class="scrollable-area rows-padding">
                 <div class="glass-box">
                     <h3>Профиль</h3>
                     <button class="danger-btn" onclick="clearData()">Очистить все данные</button>
