@@ -20,25 +20,31 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .screen { display: none; height: calc(100vh - 80px); position: relative; padding: 20px; }
 .screen.active { display: flex; flex-direction: column; }
 
-/* Список и скролл */
+/* Главная */
+.center-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.add-btn-glass {
+    background: var(--glass); border: 2px solid white; border-radius: 50%;
+    width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+}
+/* Иконка плюса как была — 35px */
+.add-btn-glass img { filter: brightness(0) invert(1); width: 35px; height: 35px; }
+.bold-label { font-weight: 900; font-size: 20px; }
+
+/* Счетчик */
+#screen-counter { padding: 15px 10px; }
 .scroll-container { 
-    overflow-y: auto; 
-    flex: 1; 
-    margin-bottom: 170px; 
-    padding-bottom: 20px; 
-    transition: margin 0.2s, padding 0.2s;
+    overflow-y: auto; flex: 1; margin-bottom: 170px; padding-bottom: 20px; 
+    transition: all 0.2s ease;
     scroll-behavior: smooth;
 }
 
-/* Когда печатаем: убираем отступ снизу и добавляем гигантский внутренний отступ для скролла */
-.scroll-container.keyboard-open { 
-    margin-bottom: 0; 
-    padding-bottom: 80vh; 
+/* Фикс для доступа к нижним строкам */
+.scroll-container.full-height { 
+    margin-bottom: 0px !important; 
+    padding-bottom: 80vh !important; 
 }
 
-.input-row { 
-    display: flex; width: 100%; margin-bottom: 12px; position: relative; align-items: center;
-}
+.input-row { display: flex; width: 100%; margin-bottom: 12px; position: relative; align-items: center; }
 
 .item-name { 
     flex: 1; background: white; border: none; border-radius: 18px; 
@@ -56,23 +62,30 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
     background: var(--yellow); color: #333; padding: 18px; border-radius: 25px; 
     text-align: center; position: absolute; bottom: 100px; left: 15px; right: 15px;
     z-index: 5; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: opacity 0.2s;
+    transition: opacity 0.2s ease;
 }
+.total-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+.total-box { font-size: 36px; font-weight: 900; }
 
 /* Меню */
 .tab-bar {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     width: 90%; height: 65px; background: rgba(0,0,0,0.4); border-radius: 40px;
     display: flex; justify-content: space-around; align-items: center; z-index: 10;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s ease;
 }
-.tab-item img { width: 26px; filter: brightness(0) invert(1); opacity: 0.5; transition: 0.3s; }
+.tab-item img { width: 26px; height: 26px; filter: brightness(0) invert(1); opacity: 0.5; transition: 0.3s; }
 .tab-item.active img { opacity: 1; }
 #tab-indicator { position: absolute; width: 50px; height: 50px; background: var(--glass); border-radius: 50%; left: 7.5%; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Конвертер */
 .converter-wrap { text-align: center; margin-top: 30px; }
 .converter-wrap input { width: 100%; background: none; border: none; color: white; font-size: 50px; text-align: center; font-weight: bold; }
+.currency-row { display: flex; justify-content: space-around; align-items: center; margin: 30px 0; }
+.curr-select { font-size: 18px; padding: 12px; background: var(--glass); border: 1px solid rgba(255,255,255,0.3); border-radius: 15px; min-width: 100px; display: flex; flex-direction: column; align-items: center; }
+/* Иконка обмена как была — 25px */
+.swap-icon { width: 25px; height: 25px; filter: brightness(0) invert(1); opacity: 0.8; }
+#conv-result { font-size: 32px; font-weight: bold; }
 
 /* Утилиты */
 .hidden { display: none !important; }
