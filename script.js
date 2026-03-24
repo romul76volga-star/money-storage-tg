@@ -1,10 +1,9 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// 1. ЗАКРЫТИЕ КЛАВИАТУРЫ ПО ТАПУ НА ЭКРАН
-document.addEventListener('click', (e) => {
-    // Если кликнули не по input, убираем фокус (скрываем клавиатуру)
-    if (e.target.tagName !== 'INPUT') {
+// 1. ЗАКРЫТИЕ КЛАВИАТУРЫ ПРИ КЛИКЕ НА ПУСТОЕ МЕСТО
+document.addEventListener('touchstart', (e) => {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         document.activeElement.blur();
     }
 });
@@ -28,26 +27,23 @@ function showScreen(id, el, idx) {
         const pos = ['7.5%', '41%', '74.5%'];
         document.getElementById('tab-indicator').style.left = pos[idx];
     }
+    
     if (el) {
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
     }
     
-    // При переключении на главную — обновляем карточки
     if (id === 'screen-home') renderCards();
 }
 
-// УПРАВЛЕНИЕ UI (Клавиатура и отступы)
+// УПРАВЛЕНИЕ UI
 function toggleUI(isFocused, element = null) {
-    const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
-    const scrollContainer = document.querySelector('.scroll-container');
+    const totalBar = document.getElementById('total-bar');
     
     if (isFocused) {
-        if (totalBar) totalBar.classList.add('v-hide');
         bottomNav.classList.add('v-hide');
-        if (scrollContainer) scrollContainer.classList.add('full-height');
-        
+        if (totalBar) totalBar.classList.add('on-keyboard');
         if (element) {
             setTimeout(() => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -56,29 +52,26 @@ function toggleUI(isFocused, element = null) {
     } else {
         setTimeout(() => {
             if (document.activeElement.tagName !== 'INPUT') {
-                if (totalBar) totalBar.classList.remove('v-hide');
                 bottomNav.classList.remove('v-hide');
-                if (scrollContainer) scrollContainer.classList.remove('full-height');
+                if (totalBar) totalBar.classList.remove('on-keyboard');
             }
         }, 150);
     }
 }
 
-// СОЗДАНИЕ СТРОКИ (Исправлен баг с 5-й строкой)
-function createNewRow() {
+// ЛОГИКА СЧЕТЧИКА
+function createNewRow(name = '', price = '') {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-        <input type="number" inputmode="decimal" placeholder="0" class="item-price" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
+        <input type="text" placeholder="товар..." class="item-name" value="${name}" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
+        <input type="number" inputmode="decimal" placeholder="0" class="item-price" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
     `;
     container.appendChild(div);
 
-    // Авто-прокрутка к новой строке (решает проблему доступности 5+ строк)
-    setTimeout(() => {
-        div.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    // Авто-скролл к новой строке
+    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     const priceInput = div.querySelector('.item-price');
     priceInput.addEventListener('keydown', (e) => {
@@ -86,9 +79,9 @@ function createNewRow() {
             e.preventDefault();
             createNewRow();
             setTimeout(() => {
-                const names = document.querySelectorAll('.item-name');
-                names[names.length - 1].focus();
-            }, 100);
+                const rows = document.querySelectorAll('.item-name');
+                rows[rows.length - 1].focus();
+            }, 50);
         }
     });
 }
@@ -99,7 +92,7 @@ function updateTotal() {
     document.getElementById('total-value').innerText = t;
 }
 
-// СОХРАНЕНИЕ И МОДАЛКА
+// СОХРАНЕНИЕ
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     if (total === "0") return;
@@ -133,37 +126,24 @@ function confirmSave() {
     showScreen('screen-home', document.querySelector('.tab-item'), 0);
 }
 
-function cancelSave() {
-    document.getElementById('modal-overlay').classList.add('hidden');
-    if(confirm("Очистить текущий счетчик?")) {
-        clearCounter();
-        showScreen('screen-home', document.querySelector('.tab-item'), 0);
-    }
-}
-
 function clearCounter() {
     document.getElementById('items-list').innerHTML = '';
     document.getElementById('total-value').innerText = '0';
     createNewRow();
 }
 
-// ОТРИСОВКА КАРТОЧЕК (Кнопка "добавить" строго по центру)
+// ОТРИСОВКА ГЛАВНОЙ
 function renderCards() {
     const container = document.getElementById('cards-container');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
     container.innerHTML = '';
 
     if (history.length === 0) {
-        // Если записей нет — показываем огромную кнопку по центру
         container.classList.remove('cards-grid');
         container.innerHTML = `
-            <div class="center-content-wrapper">
-                <div class="center-content">
-                    <button class="add-btn-glass" onclick="showScreen('screen-counter')">
-                        <img src="assets/plus.png">
-                    </button>
-                    <div class="bold-label">добавить</div>
-                </div>
+            <div class="center-content">
+                <button class="add-btn-glass" onclick="showScreen('screen-counter')"><img src="assets/plus.png"></button>
+                <div class="bold-label">добавить</div>
             </div>`;
     } else {
         container.classList.add('cards-grid');
@@ -179,18 +159,17 @@ function renderCards() {
             container.appendChild(card);
         });
 
-        // Кнопка "+" в конце списка
-        const addBtn = document.createElement('div');
-        addBtn.className = 'save-card glass dashed';
-        addBtn.innerHTML = '<span style="font-size:40px">+</span>';
-        addBtn.onclick = () => { clearCounter(); showScreen('screen-counter'); };
-        container.appendChild(addBtn);
+        const addCard = document.createElement('div');
+        addCard.className = 'save-card dashed';
+        addCard.innerHTML = '<span>+</span>';
+        addCard.onclick = () => { clearCounter(); showScreen('screen-counter'); };
+        container.appendChild(addCard);
     }
 }
 
 function deleteCard(event, index) {
     event.stopPropagation();
-    if(confirm("Удалить эту запись?")) {
+    if(confirm("Удалить запись?")) {
         let history = JSON.parse(localStorage.getItem('money_history') || '[]');
         history.splice(index, 1);
         localStorage.setItem('money_history', JSON.stringify(history));
@@ -200,30 +179,9 @@ function deleteCard(event, index) {
 
 function loadSavedData(data) {
     document.getElementById('items-list').innerHTML = '';
-    data.items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'input-row';
-        div.innerHTML = `
-            <input type="text" value="${item.name}" class="item-name" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-            <input type="number" value="${item.price}" class="item-price" oninput="updateTotal()" onfocus="toggleUI(true, this)" onblur="toggleUI(false)">
-        `;
-        document.getElementById('items-list').appendChild(div);
-    });
+    data.items.forEach(item => createNewRow(item.name, item.price));
     updateTotal();
     showScreen('screen-counter');
-}
-
-// КОНВЕРТЕР
-async function convertCurrency() {
-    const val = document.getElementById('conv-input').value;
-    const f = document.getElementById('from-code').innerText;
-    const t = document.getElementById('to-code').innerText;
-    if(!val) return;
-    try {
-        const r = await fetch(`https://api.exchangerate-api.com/v4/latest/${f}`);
-        const d = await r.json();
-        document.getElementById('conv-result').innerText = (val * d.rates[t]).toFixed(2);
-    } catch { document.getElementById('conv-result').innerText = "0.00"; }
 }
 
 // Инициализация
