@@ -3,21 +3,26 @@
     --header-dark: rgba(93, 107, 94, 0.9);
     --yellow: #f2e4b4;
     --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+}
 
 body { 
     background: var(--bg); 
     margin: 0; 
     color: white; 
-    font-family: -apple-system, sans-serif; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
     height: 100vh; 
     overflow: hidden; 
     display: flex; 
     flex-direction: column; 
 }
 
+/* Шапка */
 .app-header { 
     height: 60px; 
     background: var(--header-dark); 
@@ -27,237 +32,172 @@ body {
     z-index: 100;
 }
 
-.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; font-weight: 600; }
 
-#app-content { flex: 1; position: relative; overflow: hidden; }
+/* Основной контент */
+#app-content { flex: 1; position: relative; overflow-y: auto; }
 
-.screen { display: none; height: 100%; flex-direction: column; }
+.screen { display: none; min-height: 100%; flex-direction: column; }
 .screen.active { display: flex; }
 
-.scrollable-content { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+/* --- СТИЛИ КОНВЕРТЕРА --- */
 
-/* КАРТОЧКИ: Одинаковый размер всегда */
-.cards-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    padding-bottom: 120px;
-}
-
-.history-card {
-    height: 140px; /* Жестко фиксированная высота */
-    background: var(--glass);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-.card-date { font-size: 13px; opacity: 0.7; margin-bottom: 5px; }
-.card-sum { font-size: 16px; font-weight: bold; width: 90%; text-align: center; overflow: hidden; text-overflow: ellipsis; }
-
-.del-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; }
-
-/* СТРОКИ И ЦЕНА */
-.input-row { display: flex; background: white; border-radius: 12px; margin-bottom: 8px; height: 48px; overflow: hidden; flex-shrink: 0; }
-.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; outline: none; }
-.item-price { width: 100px; background: #5d6b5e; border: none; color: white; text-align: left; padding-left: 12px; font-weight: bold; outline: none; }
-
-/* НИЖНИЕ БЛОКИ */
-.bottom-controls { padding: 10px 15px; background: var(--bg); flex-shrink: 0; padding-bottom: 100px; }
-.add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 15px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px; }
-.total-plate { background: var(--yellow); padding: 12px; border-radius: 18px; text-align: center; color: #333; }
-.total-label { font-size: 10px; font-weight: bold; opacity: 0.8; }
-.total-sum { font-size: 22px; font-weight: 800; }
-
-/* МЕНЮ */
-.tab-bar { position: fixed; bottom: 15px; left: 20px; right: 20px; height: 60px; background: rgba(35, 35, 35, 0.85); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-.tab-item img { width: 26px; height: 26px; opacity: 0.5; }
-.tab-item.active img { opacity: 1; }
-#tab-indicator { position: absolute; width: 44px; height: 44px; background: rgba(255, 255, 255, 0.15); border-radius: 50%; transition: 0.3s; z-index: 1; }
-.hidden { display: none !important; }
-/* --- СТИЛИ ДЛЯ КОНВЕРТЕРА (GLASS iOS STYLE) --- */
-
-/* Контейнер страницы конвертера */
 .converter-page {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
     padding: 20px;
-    padding-bottom: 120px; /* Отступ под меню */
+    padding-bottom: 120px;
     align-items: center;
 }
 
-/* Основная карточка конвертера */
 .converter-card {
     width: 100%;
-    max-width: 400px; /* Ограничение ширины для больших экранов */
-    padding: 25px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    max-width: 400px;
+    padding: 20px !important;
     background: var(--glass);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
     border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
 }
 
-/* Группа ввода (label + row) */
 .converter-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
-/* Метка над полем (У меня есть / Я получу) */
 .conv-label {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
-    margin-left: 5px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-left: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Строка ввода (input + select) */
 .conv-row {
     display: flex;
-    gap: 12px;
     align-items: center;
-    background: rgba(0, 0, 0, 0.1); /* Легкое затемнение фона ввода */
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 16px;
-    padding: 5px;
+    padding: 6px;
+    gap: 10px;
 }
 
-/* Поле ввода суммы */
+/* Выбор валюты (СЛЕВА) */
+.currency-select-wrapper {
+    position: relative;
+    width: 85px; 
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.currency-select {
+    width: 100%;
+    height: 100%;
+    background: #5d6b5e; 
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0 25px 0 12px;
+    outline: none;
+    cursor: pointer;
+    z-index: 5; /* Гарантирует нажатие */
+}
+
+.select-arrow {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid rgba(255,255,255,0.8);
+    pointer-events: none;
+}
+
+/* Поле ввода (СПРАВА) */
 .conv-input {
     flex: 1;
     background: transparent;
     border: none;
-    height: 50px;
+    height: 48px;
     color: white;
     font-size: 24px;
     font-weight: 700;
-    padding: 0 15px;
+    padding-right: 10px;
+    text-align: right;
     outline: none;
-    font-family: inherit;
+    width: 100%;
 }
 
-/* Убираем стрелочки у input type="number" */
+.result-input { color: var(--yellow); }
+
+/* Убираем стрелки у числового поля */
 .conv-input::-webkit-outer-spin-button,
 .conv-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
-/* Стили для поля результата (readonly) */
-.result-input {
-    color: var(--yellow); /* Подсветим результат желтым */
-}
-
-/* Обертка для стилизации select */
-.currency-select-wrapper {
-    position: relative;
-    width: 100px;
-    height: 50px;
-    flex-shrink: 0;
-}
-
-/* Сам элемент select */
-.currency-select {
-    width: 100%;
-    height: 100%;
-    background: var(--header-dark); /* Темно-зеленый фон */
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    appearance: none; /* Убираем стандартный вид select */
-    -webkit-appearance: none;
-    padding: 0 35px 0 15px;
-    outline: none;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-/* Кастомная стрелочка select */
-.select-arrow {
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid rgba(255, 255, 255, 0.7);
-    pointer-events: none; /* Чтобы клик проходил сквозь стрелку */
-}
-
-/* Разделитель со стрелочками смены валют */
 .conv-divider {
     text-align: center;
-    font-size: 28px;
-    color: rgba(255, 255, 255, 0.4);
-    margin: 5px 0;
-    cursor: pointer;
-    transition: color 0.2s;
+    font-size: 22px;
+    color: var(--yellow);
+    margin: 4px 0;
+    opacity: 0.6;
 }
 
-.conv-divider:hover {
-    color: white;
-}
-
-/* Карточка информации о курсе */
+/* Карточка курса */
 .rate-info-card {
     width: 100%;
     max-width: 400px;
-    padding: 20px !important;
-    text-align: center;
-    background: var(--glass);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 20px;
+    padding: 18px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Текст курса */
-.rate-text {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 5px;
-}
+.rate-text { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+#current-rate-display { color: var(--yellow); }
+.rate-update-time { font-size: 11px; opacity: 0.5; margin-bottom: 12px; }
 
-#current-rate-display {
-    color: var(--yellow); /* Подсветим курс желтым */
-}
-
-/* Время обновления */
-.rate-update-time {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 15px;
-}
-
-/* Кнопка обновления курсов */
 .update-rates-btn {
     background: transparent;
     border: 1px solid var(--yellow);
     color: var(--yellow);
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 10px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    transition: 0.2s;
 }
 
-.update-rates-btn:active {
-    background: var(--yellow);
-    color: #333;
-    transform: scale(0.97);
+.update-rates-btn:active { background: var(--yellow); color: #333; }
+
+/* Таб-бар */
+.tab-bar { 
+    position: fixed; 
+    bottom: 20px; 
+    left: 20px; 
+    right: 20px; 
+    height: 65px; 
+    background: rgba(35, 35, 35, 0.9); 
+    border-radius: 32px; 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; 
+    z-index: 1000; 
 }
+.tab-item img { width: 24px; height: 24px; opacity: 0.4; }
+.tab-item.active img { opacity: 1; }
