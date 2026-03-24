@@ -14,7 +14,7 @@
             <div class="modal-total-label">СУММА ЗАТРАТ</div>
             <div id="modal-total-value" class="modal-total-amount">0</div>
             <div class="modal-actions">
-                <button class="modal-btn confirm" onclick="confirmSave()">ПОДТВЕРДИТЬ</button>
+                <button class="confirm-btn" onclick="confirmSave()">ПОДТВЕРДИТЬ</button>
             </div>
         </div>
     </div>
@@ -45,13 +45,13 @@
 
         <section id="screen-converter" class="screen">
             <div class="center-content">
-                <div class="currency-row">
+                <div class="currency-row-simple">
                     <span>USD</span>
-                    <img src="assets/swap.png" class="swap-icon">
+                    <img src="assets/swap.png" class="swap-icon-simple">
                     <span>RUB</span>
                 </div>
-                <input type="number" id="conv-input" value="100" class="big-input">
-                <div id="conv-result">0.00</div>
+                <input type="number" id="conv-input" value="100" class="big-input" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+                <div id="conv-result" class="big-result">0.00</div>
             </div>
         </section>
 
