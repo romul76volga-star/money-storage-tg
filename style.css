@@ -11,112 +11,88 @@ body {
     background: var(--bg); 
     font-family: -apple-system, sans-serif; 
     margin: 0; 
-    padding: 0;
     color: white; 
     height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
     overflow: hidden; 
-    display: flex;
-    flex-direction: column;
 }
 
-/* ФИКС НАЛОЖЕНИЯ: четкое разделение хедера, контента и навигации */
+/* ФИКС СЛОЕВ */
 .main-header {
     background: var(--dark-green);
     height: 70px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 20px 0;
+    padding: 0 20px;
     flex-shrink: 0;
     z-index: 10;
 }
 
-#app-content {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-}
+#app-content { flex: 1; position: relative; overflow: hidden; }
 
 .screen { 
     display: none !important; 
     height: 100%; 
-    width: 100%;
     padding: 20px; 
     overflow-y: auto; 
+    -webkit-overflow-scrolling: touch;
 }
 .screen.active { display: flex !important; flex-direction: column; }
 
-/* ЦЕНТРОВКА КНОПКИ ДОБАВИТЬ */
-#screen-home.active {
-    justify-content: center;
-    align-items: center;
-}
-
-.center-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+/* КАРТОЧКИ И ЦЕНТРОВКА */
+.center-content { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
 }
 
 .add-btn-glass {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: var(--glass);
-    border: 2px solid white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 90px; height: 90px;
+    border-radius: 50%; background: var(--glass);
+    border: 2px solid white; display: flex;
+    align-items: center; justify-content: center;
     margin-bottom: 10px;
 }
 .add-btn-glass img { width: 35px; height: 35px; }
 
-/* КАРТОЧКИ (Сетка) */
-.cards-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px; 
-    width: 100%;
-    padding-bottom: 100px;
+.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 30px; }
+.save-card { 
+    background: var(--dark-green); border-radius: 25px; padding: 20px; 
+    height: 130px; position: relative; display: flex; flex-direction: column; justify-content: space-between;
 }
+.save-card.dashed { border: 2px dashed white; background: none; justify-content: center; align-items: center; font-size: 40px; }
 
-/* КОНВЕРТЕР (Фикс огромной иконки) */
-.swap-icon { 
-    width: 30px !important; 
-    height: 30px !important; 
-    opacity: 0.8;
+/* СЧЕТЧИК */
+.scroll-container { flex: 1; padding-bottom: 120px; }
+.input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
+.item-name { flex: 1; background: white; border: none; border-radius: 15px; padding: 15px; height: 50px; color: #333; }
+.item-price { position: absolute; right: 5px; width: 70px; height: 40px; background: var(--dark-green); color: white; border: none; border-radius: 12px; text-align: center; font-weight: bold; }
+
+.total-container { 
+    background: var(--yellow); color: #333; padding: 15px; border-radius: 20px; 
+    position: fixed; bottom: 90px; left: 15px; right: 15px; text-align: center;
+    transition: 0.2s;
 }
+.total-container.on-keyboard { bottom: 10px !important; }
 
-#conv-input { 
-    width: 100%; 
-    background: none; 
-    border: none; 
-    color: white; 
-    font-size: 50px; 
-    text-align: center; 
-    font-weight: 800;
-}
+/* КОНВЕРТЕР - ФИКС ИКОНКИ */
+.swap-icon { width: 30px !important; height: 30px !important; margin: 0 10px; }
+#conv-input { width: 100%; background: none; border: none; color: white; font-size: 50px; text-align: center; font-weight: 800; }
 
-/* СЧЕТЧИК (Фикс 5-й строки) */
-.scroll-container { 
-    flex: 1; 
-    padding-bottom: 180px; 
-}
-
-/* НАВИГАЦИЯ */
+/* ТАБ-БАР */
 .tab-bar { 
-    height: 70px;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    height: 70px; background: rgba(0,0,0,0.4); 
+    display: flex; justify-content: space-around; align-items: center; 
+    flex-shrink: 0; position: relative;
     padding-bottom: env(safe-area-inset-bottom);
-    flex-shrink: 0;
 }
-
-.tab-item img { width: 26px; height: 26px; filter: brightness(0) invert(1); opacity: 0.5; }
+.tab-item img { width: 24px; height: 24px; filter: brightness(0) invert(1); opacity: 0.5; }
 .tab-item.active img { opacity: 1; }
+#tab-indicator { position: absolute; width: 45px; height: 45px; background: var(--glass); border-radius: 50%; transition: 0.3s; z-index: -1; }
 
+.hidden { display: none !important; }
 .v-hide { display: none !important; }
