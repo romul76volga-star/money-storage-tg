@@ -14,9 +14,8 @@
             <div id="modal-total-value" class="modal-total-amount">0</div>
             <div class="modal-actions">
                 <button class="modal-btn confirm" onclick="confirmSave()">✓</button>
-                <button class="modal-btn cancel" id="modal-cancel-btn" onclick="cancelSave()">✕</button>
+                <button class="modal-btn cancel" onclick="closeModal()">✕</button>
             </div>
-            <div id="modal-hint" style="font-size: 10px; margin-top: 15px; opacity: 0.5;"></div>
         </div>
     </div>
 
@@ -46,7 +45,7 @@
                         <div id="from-flag">🇷🇺</div>
                         <div id="from-code">RUB</div>
                     </div>
-                    <img src="assets/swap.png" class="swap-icon white-icon">
+                    <img src="assets/swap.png" class="swap-icon">
                     <div class="curr-select glass-border" onclick="openPicker('to')">
                         <div id="to-flag">🇺🇸</div>
                         <div id="to-code">USD</div>
@@ -54,7 +53,6 @@
                 </div>
                 <div id="conv-result">0.00</div>
             </div>
-            
             <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
                 <div class="picker-card">
                     <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
@@ -68,10 +66,10 @@
         <section id="screen-settings" class="screen">
             <div class="profile-section">
                 <div id="user-avatar" class="avatar-big"></div>
-                <h2 id="user-name">Загрузка...</h2>
+                <h2 id="user-name">Пользователь</h2>
                 <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.1.5</span></div>
-                    <div class="s-row" onclick="clearData()"><span>Сбросить данные</span><span style="color:#ff453a">→</span></div>
+                    <div class="s-row"><span>Версия</span><span>1.2.0</span></div>
+                    <div class="s-row" onclick="clearData()"><span>Очистить историю</span><span style="color:#ff453a">→</span></div>
                 </div>
             </div>
         </section>
