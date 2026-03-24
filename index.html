@@ -1,45 +1,112 @@
-<div class="scrollable-content converter-page">
-    <div class="glass-box converter-card">
-        <div class="converter-group">
-            <label class="conv-label">У меня есть</label>
-            <div class="conv-row">
-                <div class="currency-select-wrapper">
-                    <select id="from-currency" class="currency-select" onchange="convertCurrency()">
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="RUB" selected>RUB</option>
-                        <option value="BYN">BYN</option>
-                        <option value="KZT">KZT</option>
-                    </select>
-                    <span class="select-arrow"></span>
-                </div>
-                <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MoneyStorage</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body onclick="handleGlobalClick(event)">
+    <header class="app-header">
+        <div class="header-content">
+            <span id="screen-title">Главная</span>
+            <div id="header-action" class="header-check-btn hidden" onclick="saveAndHome()">
+                <span>✓</span>
             </div>
         </div>
+    </header>
 
-        <div class="conv-divider" onclick="swapCurrencies()"><span>⇅</span></div>
+    <main id="app-content">
+        <section id="screen-home" class="screen active">
+            <div id="cards-container" class="scrollable-content cards-grid"></div>
+        </section>
 
-        <div class="converter-group">
-            <label class="conv-label">Я получу</label>
-            <div class="conv-row">
-                <div class="currency-select-wrapper">
-                    <select id="to-currency" class="currency-select" onchange="convertCurrency()">
-                        <option value="USD" selected>USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="RUB">RUB</option>
-                        <option value="BYN">BYN</option>
-                        <option value="KZT">KZT</option>
-                    </select>
-                    <span class="select-arrow"></span>
+        <section id="screen-counter" class="screen">
+            <div id="items-list" class="scrollable-content"></div>
+            
+            <div id="counter-controls" class="bottom-controls">
+                <div class="add-row-trigger" onclick="createNewRow()">
+                    <div class="add-box-border"><span>+</span></div>
                 </div>
-                <input type="number" id="to-amount" class="conv-input result-input" readonly>
+                <div id="total-bar" class="total-plate">
+                    <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
+                    <div class="total-sum" id="total-value">0</div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="glass-box rate-info-card">
-        <div class="rate-text">Курс: <span id="current-rate-display">загрузка...</span></div>
-        <div id="rate-update-time" class="rate-update-time"></div>
-        <button class="update-rates-btn" onclick="fetchRates()">Обновить курс</button>
-    </div>
-</div>
+        <section id="screen-converter" class="screen">
+            <div class="scrollable-content converter-page">
+                <div class="glass-box converter-card">
+                    <div class="converter-group">
+                        <label class="conv-label">У меня есть</label>
+                        <div class="conv-row">
+                            <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
+                            <div class="currency-select-wrapper">
+                                <select id="from-currency" class="currency-select" onchange="convertCurrency()">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="RUB" selected>RUB</option>
+                                    <option value="BYN">BYN</option>
+                                    <option value="KZT">KZT</option>
+                                </select>
+                                <span class="select-arrow"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="conv-divider" onclick="swapCurrencies()"><span>⇅</span></div>
+
+                    <div class="converter-group">
+                        <label class="conv-label">Я получу</label>
+                        <div class="conv-row">
+                            <input type="number" id="to-amount" class="conv-input result-input" readonly>
+                            <div class="currency-select-wrapper">
+                                <select id="to-currency" class="currency-select" onchange="convertCurrency()">
+                                    <option value="USD" selected>USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="RUB">RUB</option>
+                                    <option value="BYN">BYN</option>
+                                    <option value="KZT">KZT</option>
+                                </select>
+                                <span class="select-arrow"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-box rate-info-card">
+                    <div class="rate-text">Курс: <span id="current-rate-display">загрузка...</span></div>
+                    <div class="rate-update-time" id="rate-update-time"></div>
+                    <button class="update-rates-btn" onclick="fetchRates()">Обновить курс</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-settings" class="screen">
+            <div class="scrollable-content">
+                <div class="glass-box">
+                    <h3>Профиль</h3>
+                    <button class="danger-btn" onclick="clearData()">Очистить всё</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <nav id="bottom-nav" class="tab-bar">
+        <div id="tab-indicator"></div>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">
+            <img src="assets/home.png" alt="home">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)">
+            <img src="assets/dollar.png" alt="dollar">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
+            <img src="assets/gear.png" alt="settings">
+        </div>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
