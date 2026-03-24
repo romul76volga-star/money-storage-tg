@@ -2,83 +2,80 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Money App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MoneyStorage</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div id="modal-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass">
-            <div class="modal-total-label">СУММА ЗАТРАТ</div>
-            <div id="modal-total-value" class="modal-total-amount">0</div>
-            <div class="modal-actions">
-                <button class="modal-btn confirm" onclick="confirmSave()">✓</button>
-                <button class="modal-btn cancel" onclick="cancelSave()">✕</button>
+
+    <div class="main-header">
+        <span id="header-title">Главная</span>
+        <button id="header-save" class="hidden" onclick="saveAndHome()">✓</button>
+    </div>
+
+    <div id="app-content">
+        <div id="screen-home" class="screen active">
+            <div id="cards-container" class="cards-grid"></div>
+        </div>
+
+        <div id="screen-counter" class="screen">
+            <div class="scroll-container">
+                <div id="items-list"></div>
+                <div class="add-row-bar" onclick="createNewRow()">
+                    <span>+</span>
+                </div>
+            </div>
+            
+            <div id="total-bar" class="total-container">
+                <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
+                <div id="total-value" class="total-box">0</div>
+            </div>
+        </div>
+
+        <div id="screen-converter" class="screen">
+            <div class="center-content">
+                <div class="conv-row">
+                    <span id="curr-left">USD</span>
+                    <img src="assets/swap.png" class="swap-icon" onclick="swapCurrencies()">
+                    <span id="curr-right">RUB</span>
+                </div>
+                <input type="number" id="conv-input" placeholder="0" oninput="convert()">
+                <div id="conv-result">0</div>
+            </div>
+        </div>
+
+        <div id="screen-settings" class="screen">
+            <div class="center-content">
+                <div class="user-avatar">👤</div>
+                <div id="user-name" class="bold-label">Пользователь</div>
             </div>
         </div>
     </div>
 
-    <header class="main-header">
-        <span id="header-title">Главная</span>
-        <button id="header-save" class="hidden" onclick="saveAndHome()">✓</button>
-    </header>
-
-    <main id="app-content">
-        <section id="screen-home" class="screen active">
-            <div id="cards-container" class="cards-grid"></div>
-        </section>
-
-        <section id="screen-counter" class="screen">
-            <div id="items-list" class="scroll-container"></div>
-            <div id="total-bar" class="total-container">
-                <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
-                <div class="total-box"><span id="total-value">0</span></div>
+    <div id="modal-overlay" class="hidden">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSaveModal()">✕</button>
+            <div class="modal-header">СОХРАНИТЬ?</div>
+            <div class="modal-body">
+                Сумма: <span id="modal-total-value">0</span>
             </div>
-        </section>
+            <button class="confirm-btn" onclick="confirmSave()">ПОДТВЕРДИТЬ</button>
+        </div>
+    </div>
 
-        <section id="screen-converter" class="screen">
-            <div class="converter-wrap">
-                <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
-                <div class="currency-row">
-                    <div class="curr-select glass-border" onclick="openPicker('from')">
-                        <div id="from-flag">🇷🇺</div><div id="from-code">RUB</div>
-                    </div>
-                    <img src="assets/swap.png" class="swap-icon">
-                    <div class="curr-select glass-border" onclick="openPicker('to')">
-                        <div id="to-flag">🇺🇸</div><div id="to-code">USD</div>
-                    </div>
-                </div>
-                <div id="conv-result">0.00</div>
-            </div>
-            <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
-                <div class="picker-card glass">
-                    <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
-                    <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
-                    <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
-                    <div class="p-item" onclick="selectCurr('🇰🇿','KZT')">🇰🇿 KZT</div>
-                </div>
-            </div>
-        </section>
-
-        <section id="screen-settings" class="screen">
-            <div class="profile-section">
-                <div id="user-avatar" class="avatar-big"></div>
-                <h2 id="user-name">Загрузка...</h2>
-                <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.5.0</span></div>
-                    <div class="s-row" onclick="clearData()"><span style="color:#ff453a">Очистить всё</span><span>→</span></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <nav id="bottom-nav" class="tab-bar">
+    <div class="tab-bar" id="bottom-nav">
         <div id="tab-indicator"></div>
-        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
-    </nav>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">
+            <img src="assets/home.png">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-counter', this, 1)">
+            <img src="assets/counter.png">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
+            <img src="assets/settings.png">
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
