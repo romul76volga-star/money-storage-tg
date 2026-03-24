@@ -5,97 +5,118 @@
     --glass: rgba(255, 255, 255, 0.2);
 }
 
-/* Убираем синее выделение строк при тапе */
-* { 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-    outline: none; 
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
 body { 
     background: var(--bg); 
     font-family: -apple-system, sans-serif; 
     margin: 0; 
+    padding: 0;
     color: white; 
     height: 100vh; 
     overflow: hidden; 
+    display: flex;
+    flex-direction: column;
 }
 
-/* Центровка кнопки "добавить" */
-.center-content-wrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
+/* ФИКС НАЛОЖЕНИЯ: четкое разделение хедера, контента и навигации */
+.main-header {
+    background: var(--dark-green);
+    height: 70px;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+#app-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.screen { 
+    display: none !important; 
+    height: 100%; 
+    width: 100%;
+    padding: 20px; 
+    overflow-y: auto; 
+}
+.screen.active { display: flex !important; flex-direction: column; }
+
+/* ЦЕНТРОВКА КНОПКИ ДОБАВИТЬ */
+#screen-home.active {
     justify-content: center;
     align-items: center;
-    width: 100%;
 }
 
 .center-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
 .add-btn-glass {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     background: var(--glass);
     border: 2px solid white;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+}
+.add-btn-glass img { width: 35px; height: 35px; }
+
+/* КАРТОЧКИ (Сетка) */
+.cards-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    width: 100%;
+    padding-bottom: 100px;
 }
 
-.add-btn-glass img { width: 40px !important; height: 40px !important; }
-
-/* Карточки */
-.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 120px; }
-.save-card { 
-    background: var(--dark-green); border-radius: 25px; padding: 20px; 
-    height: 140px; display: flex; flex-direction: column; justify-content: space-between;
-    position: relative;
+/* КОНВЕРТЕР (Фикс огромной иконки) */
+.swap-icon { 
+    width: 30px !important; 
+    height: 30px !important; 
+    opacity: 0.8;
 }
-.save-card.dashed { border: 2px dashed rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; background: none; }
 
-/* Счетчик */
+#conv-input { 
+    width: 100%; 
+    background: none; 
+    border: none; 
+    color: white; 
+    font-size: 50px; 
+    text-align: center; 
+    font-weight: 800;
+}
+
+/* СЧЕТЧИК (Фикс 5-й строки) */
 .scroll-container { 
     flex: 1; 
-    overflow-y: auto; 
     padding-bottom: 180px; 
-    transition: all 0.3s;
-}
-.scroll-container.full-height { padding-bottom: 20px !important; }
-
-.input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
-.item-name { 
-    flex: 1; background: white; border: none; border-radius: 18px; 
-    padding: 18px 20px; font-size: 16px; color: #333; height: 56px; 
-}
-.item-price { 
-    position: absolute; right: 6px; width: 80px; height: 44px; 
-    background: var(--dark-green); color: white; border: none; 
-    border-radius: 14px; text-align: center; font-weight: 800; 
 }
 
-/* Модальное окно */
-.modal-overlay { 
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4); 
-    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-    z-index: 1000; display: flex; align-items: center; justify-content: center; 
+/* НАВИГАЦИЯ */
+.tab-bar { 
+    height: 70px;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+    flex-shrink: 0;
 }
-.modal-card { 
-    width: 85%; background: var(--bg); border-radius: 40px; 
-    padding: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.2);
-}
-.modal-btn { width: 70px; height: 70px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; }
-.modal-btn.confirm { background: #4cd964; color: black; margin-right: 15px; }
-.modal-btn.cancel { background: #ff3b30; color: white; }
 
-.hidden { display: none !important; }
-.v-hide { opacity: 0 !important; pointer-events: none !important; }
+.tab-item img { width: 26px; height: 26px; filter: brightness(0) invert(1); opacity: 0.5; }
+.tab-item.active img { opacity: 1; }
+
+.v-hide { display: none !important; }
