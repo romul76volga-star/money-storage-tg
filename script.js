@@ -1,7 +1,7 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Закрытие клавиатуры тапом по пустому месту
+// Закрытие клавиатуры
 document.addEventListener('touchstart', (e) => {
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         document.activeElement.blur();
@@ -23,7 +23,7 @@ function showScreen(id, el, idx) {
     document.getElementById('header-save').classList.toggle('hidden', id !== 'screen-counter');
 
     if (idx !== undefined) {
-        const pos = ['8%', '41%', '74%']; // Центровка кружка под иконками
+        const pos = ['7.5%', '41%', '74.5%'];
         document.getElementById('tab-indicator').style.left = pos[idx];
     }
     
@@ -34,19 +34,21 @@ function showScreen(id, el, idx) {
     if (id === 'screen-home') renderCards();
 }
 
-// СКРЫТИЕ НАВИГАЦИИ И ПЛАНКИ ПРИ КЛАВИАТУРЕ
+// СКРЫТИЕ UI ПРИ КЛАВИАТУРЕ (Исправлено)
 function toggleUI(isFocused) {
     const bottomNav = document.getElementById('bottom-nav');
     const totalBar = document.getElementById('total-bar');
     
     if (isFocused) {
+        // Полностью убираем элементы, чтобы не прыгали над клавой
         bottomNav.style.display = 'none';
         if (totalBar) totalBar.style.display = 'none';
     } else {
+        // Возвращаем с задержкой, чтобы не дергалось
         setTimeout(() => {
             bottomNav.style.display = 'flex';
             if (totalBar) totalBar.style.display = 'block';
-        }, 150);
+        }, 100);
     }
 }
 
