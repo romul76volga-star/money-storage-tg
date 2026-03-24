@@ -1,0 +1,80 @@
+:root {
+    --bg-green: #7a8a7c;
+    --dark-green: #5d6b5e;
+    --glass: rgba(255, 255, 255, 0.15);
+    --apple-radius: 15px;
+}
+
+body {
+    background-color: var(--bg-green);
+    font-family: -apple-system, sans-serif;
+    color: white;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.screen {
+    display: none;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.screen.active { display: block; }
+
+/* Эффект стекла */
+.glass {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--apple-radius);
+}
+
+/* Стили полей ввода */
+input {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    outline: none;
+}
+
+.item-price {
+    background: #5a7a5a;
+    color: white;
+    width: 80px;
+}
+
+/* Нижняя панель */
+.tab-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark-green);
+    display: flex;
+    padding: 10px 30px;
+    border-radius: 40px;
+    gap: 20px;
+}
+
+.tab-item img { width: 30px; filter: brightness(0) invert(1); }
+.tab-item.active { background: rgba(255,255,255,0.2); border-radius: 50%; padding: 10px; margin: -10px; }
+
+/* Желтое поле суммы */
+.total-bar {
+    background: #d4c8a1;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 24px;
+    margin-top: 20px;
+}
+
+.scroll-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
