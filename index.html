@@ -19,12 +19,12 @@
         </div>
     </div>
 
-    <div id="app">
-        <header class="main-header">
-            <span id="header-title">Главная</span>
-            <button id="header-save" class="hidden" onclick="saveAndHome()">✓</button>
-        </header>
+    <header class="main-header">
+        <span id="header-title">Главная</span>
+        <button id="header-save" class="hidden" onclick="saveAndHome()">✓</button>
+    </header>
 
+    <main>
         <section id="screen-home" class="screen active">
             <div id="cards-container" class="cards-grid"></div>
         </section>
@@ -32,55 +32,31 @@
         <section id="screen-counter" class="screen">
             <div id="items-list" class="scroll-container"></div>
             <div id="total-bar" class="total-container">
-                <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
+                <div class="total-label">ОБЩАЯ СУММА</div>
                 <div class="total-box"><span id="total-value">0</span></div>
             </div>
         </section>
 
         <section id="screen-converter" class="screen">
-            <div class="converter-wrap">
-                <input type="number" id="conv-input" value="100" oninput="convertCurrency()">
-                <div class="currency-row">
-                    <div class="curr-select glass-border" onclick="openPicker('from')">
-                        <div id="from-flag">🇷🇺</div>
-                        <div id="from-code">RUB</div>
-                    </div>
-                    <img src="assets/swap.png" class="swap-icon">
-                    <div class="curr-select glass-border" onclick="openPicker('to')">
-                        <div id="to-flag">🇺🇸</div>
-                        <div id="to-code">USD</div>
-                    </div>
-                </div>
-                <div id="conv-result">0.00</div>
-            </div>
-            <div id="picker" class="picker-overlay hidden" onclick="closePicker()">
-                <div class="picker-card">
-                    <div class="p-item" onclick="selectCurr('🇷🇺','RUB')">🇷🇺 RUB</div>
-                    <div class="p-item" onclick="selectCurr('🇺🇸','USD')">🇺🇸 USD</div>
-                    <div class="p-item" onclick="selectCurr('🇪🇺','EUR')">🇪🇺 EUR</div>
-                    <div class="p-item" onclick="selectCurr('🇰🇿','KZT')">🇰🇿 KZT</div>
-                </div>
+            <div class="center-content">
+                <h2 style="opacity: 0.5">Конвертер скоро...</h2>
             </div>
         </section>
 
         <section id="screen-settings" class="screen">
-            <div class="profile-section">
-                <div id="user-avatar" class="avatar-big"></div>
-                <h2 id="user-name">Пользователь</h2>
-                <div class="settings-box glass">
-                    <div class="s-row"><span>Версия</span><span>1.2.0</span></div>
-                    <div class="s-row" onclick="clearData()"><span>Очистить историю</span><span style="color:#ff453a">→</span></div>
-                </div>
+            <div class="center-content">
+                <button class="modal-btn cancel" style="width: auto; padding: 0 20px; border-radius: 15px;" onclick="clearData()">Очистить всё</button>
             </div>
         </section>
+    </main>
 
-        <nav id="bottom-nav" class="tab-bar">
-            <div id="tab-indicator"></div>
-            <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
-            <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
-            <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
-        </nav>
-    </div>
+    <nav id="bottom-nav" class="tab-bar">
+        <div id="tab-indicator"></div>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">🏠</div>
+        <div class="tab-item" onclick="showScreen('screen-counter', this, 1)">💰</div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">⚙️</div>
+    </nav>
+
     <script src="script.js"></script>
 </body>
 </html>
