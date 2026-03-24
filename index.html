@@ -25,9 +25,13 @@
         <section id="screen-counter" class="screen">
             <div class="counter-layout">
                 <div id="items-list" class="scroll-wrapper-rows"></div>
+                
                 <div class="add-row-trigger" onclick="createNewRow()">
-                    <div class="add-box-border"><span>+</span></div>
+                    <div class="add-box-border">
+                        <span>+</span>
+                    </div>
                 </div>
+
                 <div id="total-bar" class="total-plate">
                     <div class="total-text">ОБЩАЯ СУММА ЗАТРАТ</div>
                     <div class="total-sum"><span id="total-value">0</span></div>
@@ -37,18 +41,18 @@
 
         <section id="screen-converter" class="screen">
             <div class="scroll-wrapper">
-                <h2 style="text-align:center">Конвертер валют</h2>
-                <div style="background: var(--glass); padding: 20px; border-radius: 20px;">
-                    <p style="text-align:center; opacity: 0.7;">Раздел в разработке...</p>
+                <div class="placeholder-box">
+                    <h3>Конвертер</h3>
+                    <p>Раздел в разработке</p>
                 </div>
             </div>
         </section>
 
         <section id="screen-settings" class="screen">
             <div class="scroll-wrapper">
-                <h2 style="text-align:center">Профиль</h2>
-                <div class="mini-add-plate" onclick="localStorage.clear(); location.reload();" style="font-size: 16px; border-style: solid;">
-                    Очистить данные
+                <div class="placeholder-box">
+                    <h3>Профиль</h3>
+                    <button class="danger-btn" onclick="clearData()">Очистить все данные</button>
                 </div>
             </div>
         </section>
@@ -56,9 +60,15 @@
 
     <nav id="bottom-nav" class="tab-bar">
         <div id="tab-indicator"></div>
-        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
-        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">
+            <img src="assets/home.png">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)">
+            <img src="assets/dollar.png">
+        </div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
+            <img src="assets/gear.png">
+        </div>
     </nav>
 
     <script src="script.js"></script>
