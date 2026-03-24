@@ -20,73 +20,77 @@ body { background: var(--bg); font-family: -apple-system, sans-serif; margin: 0;
 .screen { display: none; height: calc(100vh - 80px); position: relative; padding: 20px; }
 .screen.active { display: flex; flex-direction: column; }
 
-/* Главная */
+/* Карточки на главной */
+.cards-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    padding: 10px; overflow-y: auto; align-content: start; flex: 1;
+}
+.save-card {
+    background: var(--dark-green); border-radius: 25px; padding: 20px;
+    display: flex; flex-direction: column; height: 140px; justify-content: space-between;
+}
+.card-date { font-size: 13px; opacity: 0.6; font-weight: 600; }
+.card-amount { font-size: 24px; font-weight: 900; }
+
 .center-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .add-btn-glass {
     background: var(--glass); border: 2px solid white; border-radius: 50%;
     width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
 }
-/* Иконка плюса как была — 35px */
-.add-btn-glass img { filter: brightness(0) invert(1); width: 35px; height: 35px; }
+.add-btn-glass img { width: 35px; height: 35px; filter: brightness(0) invert(1); }
 .bold-label { font-weight: 900; font-size: 20px; }
 
 /* Счетчик */
-#screen-counter { padding: 15px 10px; }
 .scroll-container { 
     overflow-y: auto; flex: 1; margin-bottom: 170px; padding-bottom: 20px; 
-    transition: all 0.2s ease;
-    scroll-behavior: smooth;
+    transition: all 0.2s; scroll-behavior: smooth;
 }
+.scroll-container.full-height { margin-bottom: 0px !important; padding-bottom: 80vh !important; }
 
-/* Фикс для доступа к нижним строкам */
-.scroll-container.full-height { 
-    margin-bottom: 0px !important; 
-    padding-bottom: 80vh !important; 
-}
+.input-row { display: flex; margin-bottom: 12px; position: relative; align-items: center; }
+.item-name { flex: 1; background: white; border: none; border-radius: 18px; padding: 18px 90px 18px 20px; font-size: 16px; color: #333; width: 100%; }
+.item-price { position: absolute; right: 6px; width: 80px; height: calc(100% - 12px); background: var(--dark-green); color: white; border: none; border-radius: 14px; text-align: center; font-weight: 800; font-size: 16px; }
 
-.input-row { display: flex; width: 100%; margin-bottom: 12px; position: relative; align-items: center; }
-
-.item-name { 
-    flex: 1; background: white; border: none; border-radius: 18px; 
-    padding: 18px 90px 18px 20px; font-size: 16px; color: #333; width: 100%;
-}
-
-.item-price { 
-    position: absolute; right: 6px; width: 80px; height: calc(100% - 12px); 
-    background: var(--dark-green); color: white; border: none; border-radius: 14px; 
-    text-align: center; font-weight: 800; font-size: 16px; 
-}
-
-/* Желтый итог */
+/* Итог */
 .total-container { 
     background: var(--yellow); color: #333; padding: 18px; border-radius: 25px; 
-    text-align: center; position: absolute; bottom: 100px; left: 15px; right: 15px;
-    z-index: 5; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center; position: absolute; bottom: 100px; left: 15px; right: 15px; z-index: 5;
     transition: opacity 0.2s ease;
 }
-.total-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; }
 .total-box { font-size: 36px; font-weight: 900; }
 
-/* Меню */
+/* Модальное окно (Плашка) */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+}
+.modal-card {
+    width: 80%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 40px; padding: 30px; text-align: center;
+}
+.modal-total-label { font-size: 11px; font-weight: 800; opacity: 0.7; margin-bottom: 5px; }
+.modal-total-amount { font-size: 48px; font-weight: 900; margin-bottom: 30px; }
+.modal-actions { display: flex; justify-content: space-around; }
+.modal-btn {
+    width: 65px; height: 65px; border-radius: 50%; border: none; font-size: 24px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.modal-btn.confirm { background: var(--yellow); color: #333; }
+.modal-btn.cancel { background: none; border: 1px solid white; color: white; }
+
+/* Навигация */
 .tab-bar {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     width: 90%; height: 65px; background: rgba(0,0,0,0.4); border-radius: 40px;
     display: flex; justify-content: space-around; align-items: center; z-index: 10;
-    transition: opacity 0.2s ease;
 }
-.tab-item img { width: 26px; height: 26px; filter: brightness(0) invert(1); opacity: 0.5; transition: 0.3s; }
+.tab-item img { width: 26px; height: 26px; filter: brightness(0) invert(1); opacity: 0.5; }
 .tab-item.active img { opacity: 1; }
-#tab-indicator { position: absolute; width: 50px; height: 50px; background: var(--glass); border-radius: 50%; left: 7.5%; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+#tab-indicator { position: absolute; width: 50px; height: 50px; background: var(--glass); border-radius: 50%; left: 7.5%; transition: 0.3s; }
 
-/* Конвертер */
-.converter-wrap { text-align: center; margin-top: 30px; }
-.converter-wrap input { width: 100%; background: none; border: none; color: white; font-size: 50px; text-align: center; font-weight: bold; }
-.currency-row { display: flex; justify-content: space-around; align-items: center; margin: 30px 0; }
-.curr-select { font-size: 18px; padding: 12px; background: var(--glass); border: 1px solid rgba(255,255,255,0.3); border-radius: 15px; min-width: 100px; display: flex; flex-direction: column; align-items: center; }
-/* Иконка обмена как была — 25px */
-.swap-icon { width: 25px; height: 25px; filter: brightness(0) invert(1); opacity: 0.8; }
-#conv-result { font-size: 32px; font-weight: bold; }
-
-/* Утилиты */
+/* Прочее */
 .hidden { display: none !important; }
 .v-hide { opacity: 0 !important; pointer-events: none !important; }
+.swap-icon { width: 25px; height: 25px; filter: brightness(0) invert(1); }
+.glass { backdrop-filter: blur(15px); background: var(--glass); }
