@@ -1,9 +1,8 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let currentEditingId = null; // Храним ID редактируемой записи
+let currentEditingId = null;
 
-// UI логика
 function toggleUI(isFocused, element = null) {
     const totalBar = document.getElementById('total-bar');
     const bottomNav = document.getElementById('bottom-nav');
@@ -29,10 +28,9 @@ function toggleUI(isFocused, element = null) {
 
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const screen = document.getElementById(id);
-    screen.classList.add('active');
+    document.getElementById(id).classList.add('active');
     
-    if (id !== 'screen-counter') currentEditingId = null; // Сброс ID если ушли со счетчика
+    if (id !== 'screen-counter') currentEditingId = null;
 
     const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('header-title').innerText = titles[id];
@@ -50,7 +48,6 @@ function moveIndicator(idx) {
     document.getElementById('tab-indicator').style.left = pos[idx];
 }
 
-// Работа со списком
 function createNewRow(name = '', price = '') {
     const container = document.getElementById('items-list');
     const div = document.createElement('div');
@@ -80,14 +77,13 @@ function updateTotal() {
     document.getElementById('total-value').innerText = t;
 }
 
-// Сохранение и Удаление
 function saveAndHome() {
     const total = document.getElementById('total-value').innerText;
     if (total === "0") return;
     document.getElementById('modal-total-value').innerText = total;
     
     const hint = document.getElementById('modal-hint');
-    hint.innerText = currentEditingId ? "✕ удалит эту запись" : "✕ сбросит текущий ввод";
+    hint.innerText = currentEditingId ? "✕ удалит эту запись" : "✕ сбросит ввод";
     
     document.getElementById('modal-overlay').classList.remove('hidden');
 }
@@ -103,14 +99,12 @@ function confirmSave() {
     let history = JSON.parse(localStorage.getItem('money_history') || '[]');
     
     if (currentEditingId) {
-        // Обновляем существующую
         const idx = history.findIndex(x => x.id === currentEditingId);
         if (idx !== -1) {
             history[idx].total = document.getElementById('total-value').innerText;
             history[idx].items = items;
         }
     } else {
-        // Создаем новую
         history.push({
             id: Date.now(),
             date: new Date().toLocaleDateString('ru-RU'),
@@ -125,7 +119,6 @@ function confirmSave() {
 
 function cancelSave() {
     if (currentEditingId) {
-        // Если мы редактировали файл и нажали крестик - удаляем его
         let history = JSON.parse(localStorage.getItem('money_history') || '[]');
         history = history.filter(x => x.id !== currentEditingId);
         localStorage.setItem('money_history', JSON.stringify(history));
@@ -140,14 +133,15 @@ function finishAction() {
     currentEditingId = null;
     createNewRow();
     renderCards();
-    showScreen('screen-home', document.querySelector('.tab-item'), 0);
+    showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
 }
 
 function renderCards() {
     const container = document.getElementById('cards-container');
     const screenHome = document.getElementById('screen-home');
     const history = JSON.parse(localStorage.getItem('money_history') || '[]');
-    container.innerHTML = '';
+    
+    container.innerHTML = ''; // ОЧИСТКА ПЕРЕД ОТРИСОВКОЙ
 
     if (history.length === 0) {
         screenHome.classList.add('empty');
@@ -165,6 +159,8 @@ function renderCards() {
             card.innerHTML = `<div class="card-date">${data.date}</div><div class="card-amount">${data.total}</div>`;
             container.appendChild(card);
         });
+        
+        // Кнопка в конце сетки (дизайн не меняем)
         const addCard = document.createElement('div');
         addCard.className = 'save-card center-content';
         addCard.style.background = 'var(--glass)';
@@ -183,7 +179,6 @@ function loadSavedData(data) {
     showScreen('screen-counter');
 }
 
-// Конвертер
 async function convertCurrency() {
     const val = document.getElementById('conv-input').value;
     const f = document.getElementById('from-code').innerText;
@@ -205,7 +200,7 @@ function selectCurr(f, c) {
     closePicker(); convertCurrency();
 }
 
-// Инит
+// Запуск
 createNewRow();
 renderCards();
 if(tg.initDataUnsafe?.user) {
