@@ -1,78 +1,118 @@
 :root {
-    --bg: #7a8a7c; --header: rgba(93, 107, 94, 0.9); --accent: #f2e4b4;
-    --card-bg: rgba(255, 255, 255, 0.1); --text: #ffffff; --nav-bg: #1c1c1c;
-}
-body.theme-black { --bg: #000000; --header: #111111; --accent: #888888; --card-bg: #1a1a1a; --text: #ffffff; --nav-bg: #111111; }
-body.theme-white { --bg: #f5f5f5; --header: #ffffff; --accent: #333333; --card-bg: #ffffff; --text: #111111; --nav-bg: #222222; }
-
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); margin: 0; color: var(--text); font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-
-/* СКРЫТИЕ ПРИ КЛАВИАТУРЕ */
-body.kb-active .hide-on-kb {
-    display: none !important;
+    /* Переменные для зеленой темы по умолчанию */
+    --bg: #7a8a7c;
+    --header: rgba(93, 107, 94, 0.9);
+    --accent: #f2e4b4; /* Желтый */
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text: #ffffff;
+    --card-sum-color: var(--accent);
+    --indicator-bg: rgba(255, 255, 255, 0.1);
 }
 
-.app-header { height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 20px; z-index: 100; }
-.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-.header-check-btn { background: white; color: #7a8a7c; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+/* Черно-белая тема */
+body.theme-bw {
+    --bg: #1a1a1a;
+    --header: rgba(0, 0, 0, 0.8);
+    --accent: #888888; /* Серый вместо желтого */
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text: #ffffff;
+    --card-sum-color: #bbbbbb;
+    /* Эффект стекла у овала */
+    --indicator-bg: rgba(255, 255, 255, 0.15);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+body { 
+    background: var(--bg); 
+    margin: 0; 
+    color: var(--text); 
+    font-family: -apple-system, system-ui, sans-serif; 
+    height: 100vh; 
+    overflow: hidden; 
+    display: flex; 
+    flex-direction: column; 
+    transition: background 0.3s ease;
+}
+
+.app-header { height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 20px; z-index: 100; flex-shrink: 0; }
+.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; font-weight: 600; font-size: 18px; }
+.header-check-btn { background: white; color: #7a8a7c; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
 
 #app-content { flex: 1; position: relative; overflow: hidden; }
-.screen { display: none; height: 100%; }
-.screen.active { display: flex; flex-direction: column; }
-.scrollable-content { flex: 1; overflow-y: auto; padding: 15px 15px 160px 15px; }
+.screen { display: none; height: 100%; flex-direction: column; }
+.screen.active { display: flex; }
+.scrollable-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 120px; }
 
-/* КАРТОЧКИ ГЛАВНОЙ */
+/* КАРТОЧКИ ИСТОРИИ */
 .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.history-card { height: 140px; background: var(--card-bg); border-radius: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
-.add-file-card { height: 140px; border: 2px dashed rgba(255,255,255,0.4); border-radius: 22px; display: flex; justify-content: center; align-items: center; }
-.del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; }
+.history-card {
+    height: 140px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.card-date { font-size: 12px; opacity: 0.6; margin-bottom: 5px; }
+.card-sum { font-size: 18px; font-weight: 800; color: var(--card-sum-color); }
+.del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; }
 
 /* СЧЕТЧИК */
-.input-row { display: flex; background: white; border-radius: 14px; margin-bottom: 10px; height: 52px; overflow: hidden; }
-.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; }
-.item-price { width: 100px; background: #5d6b5e; border: none; color: white; font-weight: 700; text-align: center; }
+.input-row { display: flex; background: white; border-radius: 14px; margin-bottom: 10px; height: 52px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; color: #333; font-weight: 500; }
+.item-price { width: 110px; background: #5d6b5e; border: none; color: white; padding-left: 15px; font-weight: 700; font-size: 16px; }
 
-.bottom-controls { position: fixed; bottom: 90px; left: 15px; right: 15px; z-index: 50; }
-.add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 18px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; margin-bottom: 10px; }
-.total-plate { background: #f2e4b4; padding: 12px; border-radius: 22px; text-align: center; color: #333; }
-.total-sum { font-size: 24px; font-weight: 900; }
+.bottom-controls { padding: 10px 15px; background: var(--bg); position: fixed; bottom: 85px; left: 0; right: 0; z-index: 50; }
+.add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 18px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 10px; cursor: pointer; }
+.total-plate { background: var(--accent); padding: 15px; border-radius: 22px; text-align: center; color: #333; transition: background 0.3s; }
+.total-label { font-size: 11px; font-weight: 800; letter-spacing: 0.5px; opacity: 0.8; }
+.total-sum { font-size: 26px; font-weight: 900; }
 
-/* КОНВЕРТЕР - ИСПРАВЛЕННЫЙ */
-.conv-row-simple { 
-    display: flex; 
-    align-items: center; 
-    background: rgba(0,0,0,0.1); 
-    border-radius: 15px; 
-    padding: 5px 12px; 
-    gap: 10px;
+/* КОНВЕРТЕР */
+.converter-card { padding: 22px; border-radius: 28px; background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); }
+.conv-row { display: flex; gap: 10px; background: rgba(0,0,0,0.15); border-radius: 18px; padding: 6px; align-items: center; }
+.conv-input { flex: 1; background: transparent; border: none; color: white; font-size: 24px; font-weight: 800; padding: 10px; width: 40%; }
+.currency-select { background: #5d6b5e; color: white; border: none; border-radius: 12px; padding: 12px 35px 12px 15px; font-weight: 700; appearance: none; -webkit-appearance: none; }
+.update-rates-btn { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 12px; margin-top: 15px; font-weight: 700; }
+
+/* ПРОФИЛЬ */
+.profile-glass-card { width: 95%; padding: 30px; text-align: center; border-radius: 35px; background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.avatar-container img { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent); position: relative; z-index: 2; transition: border 0.3s; }
+.avatar-glow { position: absolute; top: 0; left: 0; width: 110px; height: 110px; background: var(--accent); filter: blur(30px); opacity: 0.2; z-index: 1; margin: 0 auto; left: 50%; transform: translateX(-50%); }
+
+.theme-selector { width: 95%; margin-top: 20px; text-align: left; }
+.settings-title { font-size: 12px; opacity: 0.6; text-transform: uppercase; margin-left: 10px; margin-bottom: 10px; }
+.theme-options { display: flex; gap: 10px; padding: 0 5px; }
+.theme-opt-btn { flex: 1; background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 15px; font-weight: 600; }
+
+.settings-list { width: 95%; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+.settings-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; color: white; font-size: 16px; font-weight: 600; text-align: center; }
+
+/* ТАБ-БАР */
+.tab-bar { position: fixed; bottom: 15px; left: 20px; right: 20px; height: 65px; background: #1c1c1c; border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+#tab-indicator { 
+    position: absolute; 
+    width: 48px; 
+    height: 48px; 
+    background: var(--indicator-bg); 
+    border-radius: 50%; 
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    z-index: 1; 
+    /* Эффект стекла */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
 }
-.currency-select { 
-    background: rgba(0,0,0,0.2); 
-    color: white; 
-    border: none; 
-    padding: 10px 5px; 
-    border-radius: 8px; 
-    font-weight: bold; 
-    min-width: 70px;
-}
-.conv-input { 
-    flex: 1; 
-    background: transparent; 
-    border: none; 
-    color: var(--text); 
-    font-size: 22px; 
-    font-weight: 700; 
-    text-align: right; /* Числа прижаты вправо */
-}
+.tab-item { position: relative; z-index: 10; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+.tab-item img { width: 26px; height: 26px; opacity: 0.4; transition: 0.3s; }
+.tab-item.active img { opacity: 1; }
 
-.swap-container { display: flex; justify-content: center; margin: 10px 0; }
-.conv-divider { background: var(--accent); color: #333; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-
-/* NAV */
-.tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; background: var(--nav-bg); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; transition: 0.2s; }
-#tab-indicator { position: absolute; width: 48px; height: 48px; background: rgba(255,255,255,0.1); border-radius: 50%; transition: 0.3s; z-index: 1; }
-.tab-item { width: 50px; z-index: 5; opacity: 0.4; }
-.tab-item.active { opacity: 1; }
-.tab-item img { width: 24px; }
 .hidden { display: none !important; }
