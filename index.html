@@ -11,9 +11,7 @@
     <header class="app-header">
         <div class="header-content">
             <span id="screen-title">Главная</span>
-            <div id="header-action" class="header-check-btn hidden" onclick="saveAndHome()">
-                <span>✓</span>
-            </div>
+            <div id="header-action" class="header-check-btn hidden" onclick="saveAndHome()"><span>✓</span></div>
         </div>
     </header>
 
@@ -25,9 +23,7 @@
         <section id="screen-counter" class="screen">
             <div id="items-list" class="scrollable-content"></div>
             <div id="counter-controls" class="bottom-controls">
-                <div class="add-row-trigger" onclick="createNewRow()">
-                    <div class="add-box-border"><span>+</span></div>
-                </div>
+                <div class="add-box-border" onclick="createNewRow()"><span>+</span></div>
                 <div id="total-bar" class="total-plate">
                     <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
                     <div class="total-sum" id="total-value">0</div>
@@ -37,44 +33,36 @@
 
         <section id="screen-converter" class="screen">
             <div class="scrollable-content converter-page">
-                <div class="glass-box converter-card">
-                    <div class="converter-group">
-                        <label class="conv-label">У меня есть</label>
-                        <div class="conv-row">
-                            <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
-                            <div class="currency-select-wrapper">
-                                <select id="from-currency" class="currency-select" onchange="convertCurrency()">
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="RUB" selected>RUB</option>
-                                    <option value="BYN">BYN</option>
-                                    <option value="KZT">KZT</option>
-                                </select>
-                                <span class="select-arrow"></span>
-                            </div>
-                        </div>
+                <div class="converter-card">
+                    <div class="conv-row">
+                        <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
+                        <select id="from-currency" class="currency-select" onchange="convertCurrency()">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="RUB" selected>RUB</option>
+                            <option value="BYN">BYN</option>
+                            <option value="KZT">KZT</option>
+                        </select>
                     </div>
-                    <div class="conv-divider" onclick="swapCurrencies()"><span>⇅</span></div>
-                    <div class="converter-group">
-                        <label class="conv-label">Я получу</label>
-                        <div class="conv-row">
-                            <input type="number" id="to-amount" class="conv-input result-input" readonly>
-                            <div class="currency-select-wrapper">
-                                <select id="to-currency" class="currency-select" onchange="convertCurrency()">
-                                    <option value="USD" selected>USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="RUB">RUB</option>
-                                    <option value="BYN">BYN</option>
-                                    <option value="KZT">KZT</option>
-                                </select>
-                                <span class="select-arrow"></span>
-                            </div>
-                        </div>
+                    
+                    <div class="swap-container">
+                        <div class="conv-divider" onclick="swapCurrencies()">⇅</div>
+                    </div>
+
+                    <div class="conv-row">
+                        <input type="number" id="to-amount" class="conv-input result-input" readonly>
+                        <select id="to-currency" class="currency-select" onchange="convertCurrency()">
+                            <option value="USD" selected>USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="RUB">RUB</option>
+                            <option value="BYN">BYN</option>
+                            <option value="KZT">KZT</option>
+                        </select>
                     </div>
                 </div>
-                <div class="glass-box rate-info-card">
-                    <div class="rate-text">Курс: <span id="current-rate-display">загрузка...</span></div>
-                    <div class="rate-update-time" id="rate-update-time"></div>
+                <div class="rate-info-card">
+                    <div class="rate-text"><span id="current-rate-display">загрузка...</span></div>
+                    <div id="rate-update-time" style="font-size:10px; opacity:0.5; margin-top:5px"></div>
                     <button class="update-rates-btn" onclick="fetchRates()">Обновить курс</button>
                 </div>
             </div>
@@ -83,29 +71,16 @@
         <section id="screen-settings" class="screen">
             <div class="scrollable-content profile-page">
                 <div class="profile-glass-card">
-                    <div class="avatar-container">
-                        <img id="user-photo" src="https://via.placeholder.com/110" alt="Avatar">
-                        <div class="avatar-glow"></div>
-                    </div>
+                    <div class="avatar-container"><img id="user-photo" src="" alt=""><div class="avatar-glow"></div></div>
                     <h2 id="user-name" class="profile-nickname">Загрузка...</h2>
-                    <div class="profile-divider"></div>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Версия</span>
-                            <span class="info-value">1.1.0</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Статус</span>
-                            <span id="user-status" class="info-value">Active</span>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="theme-selector">
                     <h3 class="settings-title">Оформление</h3>
                     <div class="theme-options">
-                        <button class="theme-opt-btn" onclick="setTheme('theme-green')">Зеленый</button>
-                        <button class="theme-opt-btn" onclick="setTheme('theme-bw')">Ч/Б Стиль</button>
+                        <button class="theme-opt-btn t-green" onclick="setTheme('theme-green')">Зеленый</button>
+                        <button class="theme-opt-btn t-black" onclick="setTheme('theme-black')">Черный</button>
+                        <button class="theme-opt-btn t-white" onclick="setTheme('theme-white')">Белый</button>
                     </div>
                 </div>
 
@@ -119,15 +94,9 @@
 
     <nav id="bottom-nav" class="tab-bar">
         <div id="tab-indicator"></div>
-        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)">
-            <img src="assets/home.png" alt="home">
-        </div>
-        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)">
-            <img src="assets/dollar.png" alt="dollar">
-        </div>
-        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)">
-            <img src="assets/gear.png" alt="settings">
-        </div>
+        <div class="tab-item active" onclick="showScreen('screen-home', this, 0)"><img src="assets/home.png"></div>
+        <div class="tab-item" onclick="showScreen('screen-converter', this, 1)"><img src="assets/dollar.png"></div>
+        <div class="tab-item" onclick="showScreen('screen-settings', this, 2)"><img src="assets/gear.png"></div>
     </nav>
     <script src="script.js"></script>
 </body>
