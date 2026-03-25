@@ -27,7 +27,6 @@ body {
     overflow: hidden; display: flex; flex-direction: column; transition: 0.3s ease;
 }
 
-/* ЭФФЕКТ СКРЫТИЯ ПРИ КЛАВИАТУРЕ */
 body.keyboard-open .bottom-controls, 
 body.keyboard-open .tab-bar-fixed,
 body.keyboard-open .add-box-border {
@@ -65,22 +64,20 @@ body.keyboard-open .add-box-border {
 .del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; }
 
 /* СЧЕТЧИК */
-.input-row { display: flex; background: white; border-radius: 14px; margin-bottom: 10px; height: 52px; overflow: hidden; }
-.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; color: #333; }
-.item-price { 
-    width: 100px; flex-shrink: 0; background: #5d6b5e; border: none; 
-    color: white; font-weight: 700; text-align: center; font-size: 16px; 
-}
+.input-row { display: flex; background: white; border-radius: 14px; margin-bottom: 10px; height: 52px; overflow: hidden; width: 100%; }
+.item-name { flex: 1; min-width: 0; border: none; padding-left: 15px; font-size: 16px; color: #333; overflow: hidden; text-overflow: ellipsis; }
+.item-price { width: 90px; flex-shrink: 0; background: #5d6b5e; border: none; color: white; font-weight: 700; text-align: center; font-size: 15px; padding: 0 8px; }
 
 .bottom-controls { position: fixed; bottom: 85px; left: 15px; right: 15px; z-index: 50; }
 .add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 18px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 10px; color: white; cursor: pointer; }
 
-/* ФИКС ИТОГОВ ДЛЯ БЕЛОЙ ТЕМЫ */
 .total-plate { background: var(--accent); padding: 15px; border-radius: 22px; text-align: center; color: #333; }
 body.theme-white .total-plate { background: #1c1c1c; color: #ffffff; }
 .total-sum { font-size: 24px; font-weight: 900; }
+.total-label { font-size: 11px; opacity: 0.6; font-weight: 700; margin-bottom: 4px; }
 
 /* КОНВЕРТЕР */
+.converter-page { display: flex; flex-direction: column; gap: 0; }
 .converter-card { padding: 22px; border-radius: 28px; display: flex; flex-direction: column; gap: 8px; }
 .conv-label { font-size: 11px; opacity: 0.6; text-transform: uppercase; font-weight: 700; }
 .conv-row { display: flex; gap: 10px; background: rgba(0,0,0,0.1); border-radius: 16px; padding: 6px; align-items: center; }
@@ -90,27 +87,66 @@ body.theme-white .total-plate { background: #1c1c1c; color: #ffffff; }
 
 .swap-container-central { display: flex; justify-content: center; align-items: center; position: relative; height: 10px; z-index: 5; }
 .conv-divider { 
-    background: var(--accent); color: #fff; width: 38px; height: 38px; 
+    background: var(--accent); color: #333; width: 38px; height: 38px; 
     border-radius: 50%; display: flex; align-items: center; justify-content: center; 
     font-size: 20px; cursor: pointer; position: absolute; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 body.theme-white .conv-divider { background: #1c1c1c; color: #fff; }
 
 .rate-info-card { text-align: center; margin-top: 15px; padding: 20px; border-radius: 20px; }
-.update-rates-btn { margin-top: 10px; background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 12px; font-weight: 600; }
+.rate-text { font-size: 16px; font-weight: 700; }
+.update-rates-btn { margin-top: 10px; background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; }
 
 /* ПРОФИЛЬ */
+.profile-page { display: flex; flex-direction: column; gap: 0; }
 .profile-glass-card { width: 100%; padding: 30px; text-align: center; border-radius: 35px; }
 .avatar-container { position: relative; width: 90px; height: 90px; margin: 0 auto 15px; }
 .avatar-container img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--accent); }
+.avatar-glow { display: none; }
 .profile-nickname { font-size: 24px; font-weight: 800; margin: 10px 0; }
+.profile-divider { height: 1px; background: var(--glass-border); margin: 10px 0; }
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.info-item { display: flex; flex-direction: column; gap: 4px; }
 .info-label { display: block; font-size: 10px; opacity: 0.5; text-transform: uppercase; }
+.info-value { font-size: 15px; font-weight: 700; }
 
-.theme-options { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+.theme-selector-box { margin-top: 16px; }
+.settings-title { font-size: 15px; font-weight: 700; opacity: 0.6; margin: 0 0 4px 0; }
+.theme-options { display: flex; gap: 15px; justify-content: center; margin-top: 12px; }
+.theme-item { cursor: pointer; }
 .theme-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); cursor: pointer; }
-.t-green { background: #5d6b5e; } .t-black { background: #111; } .t-white { background: #fff; border-color: #ccc; }
+.t-green { background: #5d6b5e; }
+.t-black { background: #111; }
+.t-white { background: #fff; border-color: #ccc; }
 
+.settings-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; width: 100%; }
+
+.action-btn { 
+    width: 100%; padding: 16px; border-radius: 18px; border: none; 
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s ease; letter-spacing: 0.3px; 
+}
+.action-btn:first-child { 
+    background: rgba(255,255,255,0.1); 
+    border: 1px solid rgba(255,255,255,0.2); 
+    color: var(--text); 
+}
+.action-btn:last-child { 
+    background: rgba(220,80,80,0.2); 
+    border: 1px solid rgba(220,80,80,0.35); 
+    color: #ff6b6b; 
+}
+body.theme-white .action-btn:first-child { 
+    background: #f0f0f0; 
+    border: 1px solid #ddd; 
+    color: #333; 
+}
+body.theme-white .action-btn:last-child { 
+    background: rgba(220,80,80,0.08); 
+    border: 1px solid rgba(220,80,80,0.3); 
+    color: #cc3333; 
+}
+
+/* TAB BAR */
 .tab-bar-fixed { 
     position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; 
     background: var(--nav); border-radius: 35px; display: flex; 
