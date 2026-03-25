@@ -54,10 +54,15 @@ body {
 
 /* УЧЕТ ЗАТРАТ */
 .input-row { display: flex; background: white; border-radius: 12px; margin-bottom: 8px; height: 48px; overflow: hidden; }
-.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; outline: none; color: #333; }
-.item-price { width: 100px; background: #5d6b5e; border: none; color: white; text-align: left; padding-left: 12px; font-weight: bold; outline: none; }
+.item-name { 
+    flex: 1; border: none; padding-left: 15px; font-size: 16px; outline: none; color: #333; 
+}
+.item-price { 
+    width: 100px; background: #5d6b5e; border: none; color: white; text-align: left; 
+    padding-left: 12px; font-weight: bold; outline: none; font-size: 16px;
+}
 
-.bottom-controls { padding: 10px 15px; background: var(--bg); position: fixed; bottom: 85px; left: 0; right: 0; z-index: 50; }
+.bottom-controls { padding: 10px 15px; background: var(--bg); position: fixed; bottom: 85px; left: 0; right: 0; z-index: 50; transition: opacity 0.2s; }
 .add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 15px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px; }
 .total-plate { background: var(--yellow); padding: 12px; border-radius: 18px; text-align: center; color: #333; }
 .total-label { font-size: 10px; font-weight: bold; }
@@ -66,23 +71,31 @@ body {
 /* КОНВЕРТЕР */
 .converter-page { display: flex; flex-direction: column; gap: 15px; }
 .converter-card { background: var(--glass); padding: 20px; border-radius: 25px; }
-.conv-row { display: flex; gap: 10px; background: rgba(0,0,0,0.1); border-radius: 15px; padding: 5px; align-items: center; }
-.conv-input { flex: 1; background: transparent; border: none; color: white; font-size: 24px; font-weight: bold; padding: 10px; outline: none; width: 40%; }
+.conv-row { display: flex; gap: 10px; background: rgba(0,0,0,0.1); border-radius: 15px; padding: 5px; align-items: center; position: relative; }
+.conv-input { 
+    flex: 1; background: transparent; border: none; color: white; font-size: 24px; 
+    font-weight: bold; padding: 10px; outline: none; width: 40%; 
+}
 
 /* ПЛАШКИ ВАЛЮТ СПРАВА */
-.currency-select-wrapper { position: relative; margin-left: auto; } /* Смещаем вправо */
+.currency-select-wrapper { position: relative; margin-left: auto; z-index: 10; }
 .currency-select { 
     background: #5d6b5e; color: white; border: none; border-radius: 10px; 
-    padding: 10px 25px 10px 12px; font-weight: bold; appearance: none;
+    padding: 10px 30px 10px 12px; font-weight: bold; 
+    appearance: none; -webkit-appearance: none; font-size: 16px;
 }
-.select-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border-top: 5px solid white; border-left: 4px solid transparent; border-right: 4px solid transparent; }
+.select-arrow { 
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%); 
+    border-top: 5px solid white; border-left: 4px solid transparent; border-right: 4px solid transparent; 
+    pointer-events: none; 
+}
 
-.conv-divider { text-align: center; font-size: 30px; cursor: pointer; opacity: 0.5; }
+.conv-divider { text-align: center; font-size: 30px; cursor: pointer; opacity: 0.5; padding: 10px 0; }
 .rate-info-card { text-align: center; background: var(--glass); padding: 15px; border-radius: 20px; }
 .update-rates-btn { background: transparent; border: 1px solid var(--yellow); color: var(--yellow); padding: 8px 15px; border-radius: 10px; margin-top: 10px; }
 
 /* МЕНЮ */
-.tab-bar { position: fixed; bottom: 15px; left: 20px; right: 20px; height: 60px; background: #1c1c1c; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+.tab-bar { position: fixed; bottom: 15px; left: 20px; right: 20px; height: 60px; background: #1c1c1c; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; transition: transform 0.3s, opacity 0.3s; }
 .tab-item img { width: 26px; height: 26px; opacity: 0.5; }
 .tab-item.active img { opacity: 1; }
 #tab-indicator { position: absolute; width: 44px; height: 44px; background: rgba(255,255,255,0.1); border-radius: 50%; transition: 0.3s; z-index: 1; }
