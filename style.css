@@ -1,31 +1,33 @@
 :root {
     --bg: #7a8a7c; --header: rgba(93, 107, 94, 0.9); --accent: #f2e4b4;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
     --glass-blur: blur(20px);
     --text: #ffffff; --nav: #1c1c1c;
 }
 
 body.theme-black {
     --bg: #000000; --header: #111111; --accent: #888888;
-    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.1);
+    --text: #ffffff; --nav: #111111;
 }
 
 body.theme-white {
     --bg: #f5f5f5; --header: #ffffff; --accent: #333333;
-    --glass-bg: rgba(0, 0, 0, 0.05);
-    --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-bg: rgba(0, 0, 0, 0.03);
+    --glass-border: rgba(0, 0, 0, 0.08);
     --text: #111111; --nav: #222222;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { 
     background: var(--bg); margin: 0; color: var(--text); 
-    font-family: -apple-system, system-ui, sans-serif; height: 100vh; 
-    overflow: hidden; display: flex; flex-direction: column; transition: 0.3s ease;
+    font-family: -apple-system, sans-serif; height: 100vh; 
+    overflow: hidden; display: flex; flex-direction: column;
 }
 
+/* СКРЫТИЕ ПРИ КЛАВИАТУРЕ */
 body.keyboard-open .bottom-controls, 
 body.keyboard-open .tab-bar-fixed { display: none !important; }
 
@@ -40,75 +42,38 @@ body.keyboard-open .tab-bar-fixed { display: none !important; }
 .screen.active { display: flex; }
 .scrollable-content { flex: 1; overflow-y: auto; padding: 15px 15px 130px 15px; }
 
-/* КАРТОЧКИ */
-.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.history-card { 
-    height: 140px; border-radius: 22px; display: flex; flex-direction: column; 
-    justify-content: center; align-items: center; position: relative; 
-    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-}
-.card-sum { font-size: 18px; font-weight: 800; color: var(--accent); }
-.del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; }
-
-/* СЧЕТЧИК: СТРОКА ТЕПЕРЬ ВСЕГДА ВЛЕЗАЕТ */
-.input-row { 
-    display: flex; background: white; border-radius: 14px; 
-    margin-bottom: 10px; height: 52px; overflow: hidden;
-    width: 100%; /* Гарантируем ширину */
-}
-.item-name { 
-    flex: 1; border: none; padding-left: 15px; font-size: 16px; color: #333;
-    min-width: 0; /* Позволяет инпуту сжиматься */
-}
+/* СЧЕТЧИК (СТРОКИ) */
+.input-row { display: flex; background: white; border-radius: 14px; margin-bottom: 10px; height: 52px; overflow: hidden; }
+.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; color: #333; }
 .item-price { 
-    width: 30%; /* Относительная ширина */
-    min-width: 80px;
-    background: #5d6b5e; border: none; color: white; 
-    font-weight: 700; text-align: center; font-size: 16px;
+    width: 100px; flex-shrink: 0; background: #5d6b5e; border: none; 
+    color: white; font-weight: 700; text-align: center; font-size: 16px;
+    transition: font-size 0.2s; /* Для плавного уменьшения текста */
 }
 
-.bottom-controls { position: fixed; bottom: 85px; left: 15px; right: 15px; z-index: 50; }
-.add-box-border { border: 2px dashed rgba(255,255,255,0.4); border-radius: 18px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 10px; color: white; cursor: pointer; }
-
-.total-plate { background: var(--accent); padding: 15px; border-radius: 22px; text-align: center; color: #333; }
+.total-plate { background: var(--accent); padding: 15px; border-radius: 22px; text-align: center; color: #333; margin-top: 10px; }
 body.theme-white .total-plate { background: #1c1c1c; color: #ffffff; }
 .total-sum { font-size: 24px; font-weight: 900; }
 
-/* КОНВЕРТЕР */
-.converter-card { padding: 22px; border-radius: 28px; display: flex; flex-direction: column; gap: 8px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); }
+/* КОНВЕРТЕР (ДИЗАЙН ИЗ СКРИНШОТОВ) */
+.converter-card { padding: 22px; border-radius: 28px; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 8px; }
 .conv-row { display: flex; gap: 10px; background: rgba(0,0,0,0.1); border-radius: 16px; padding: 6px; align-items: center; }
-.conv-input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 24px; font-weight: 800; padding: 10px; width: 40%; }
+.conv-input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 24px; font-weight: 800; padding: 10px; }
 .currency-select { background: #5d6b5e; color: white; border: none; padding: 10px; border-radius: 12px; font-weight: bold; }
 
-/* ПРОФИЛЬ И КНОПКИ */
-.settings-actions { 
-    margin-top: 25px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 12px; 
-}
-.action-btn { 
-    width: 100%;
-    background: var(--glass-bg); 
-    border: 1px solid var(--glass-border);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    color: var(--text); 
-    padding: 20px; 
-    border-radius: 22px; 
-    font-weight: 700; 
-    font-size: 16px; 
-    cursor: pointer; 
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-.action-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.15); }
+/* ПРОФИЛЬ (ИСПРАВЛЕННЫЕ КНОПКИ) */
+.profile-glass-card { width: 100%; padding: 30px; text-align: center; border-radius: 35px; background: var(--glass-bg); border: 1px solid var(--glass-border); }
+.avatar-container img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
 
-.tab-bar-fixed { 
-    position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; 
-    background: var(--nav); border-radius: 35px; display: flex; 
-    justify-content: space-around; align-items: center; z-index: 1000; 
+/* Новые горизонтальные кнопки */
+.profile-actions-row { display: flex; gap: 10px; margin-top: 25px; justify-content: center; }
+.btn-action { 
+    flex: 1; background: white; color: #333; border: none; 
+    padding: 12px; border-radius: 14px; font-weight: 700; font-size: 14px;
 }
-.tab-indicator-glass { position: absolute; width: 48px; height: 48px; background: rgba(255,255,255,0.15); border-radius: 50%; transition: 0.3s; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+body.theme-black .btn-action { background: #222; color: #fff; }
+
+/* ТАБ-БАР */
+.tab-bar-fixed { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; background: var(--nav); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; }
 .tab-item img { width: 24px; opacity: 0.4; transition: 0.3s; }
 .tab-item.active img { opacity: 1; transform: scale(1.1); }
