@@ -53,7 +53,7 @@ function openFile(index) {
     list.innerHTML = '';
     if (index === -1) {
         createNewRow();
-        document.getElementById('total-value').innerText = '0 ₽';
+        document.getElementById('total-value').innerText = '0';
     } else {
         const record = savedRecords[index];
         record.items.forEach(item => list.appendChild(createRowElement(item.name, item.price)));
@@ -62,16 +62,17 @@ function openFile(index) {
     showScreen('screen-counter', null, 0);
 }
 
-function createNewRow() { document.getElementById('items-list').appendChild(createRowElement()); }
+function createNewRow() { 
+    document.getElementById('items-list').appendChild(createRowElement()); 
+}
 
 function updateTotal() {
     let total = 0;
     document.querySelectorAll('.item-price').forEach(i => total += Number(i.value) || 0);
-    document.getElementById('total-value').innerText = total.toLocaleString() + ' ₽';
+    document.getElementById('total-value').innerText = total.toLocaleString('ru-RU');
 }
 
 function saveAndHome() {
-    const total = document.getElementById('total-value').innerText;
     const items = [];
     document.querySelectorAll('.input-row').forEach(row => {
         const n = row.querySelector('.item-name').value;
@@ -79,11 +80,18 @@ function saveAndHome() {
         if (n || p) items.push({ name: n, price: p });
     });
     if (items.length > 0) {
+        let total = 0;
+        items.forEach(i => total += Number(i.price) || 0);
+        const totalStr = total.toLocaleString('ru-RU') + ' ₽';
         const record = { 
-            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, 
-            total, items 
+            date: currentEditingIndex === -1 
+                ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) 
+                : savedRecords[currentEditingIndex].date, 
+            total: totalStr, 
+            items 
         };
-        if (currentEditingIndex === -1) savedRecords.unshift(record); else savedRecords[currentEditingIndex] = record;
+        if (currentEditingIndex === -1) savedRecords.unshift(record); 
+        else savedRecords[currentEditingIndex] = record;
         localStorage.setItem('money_logs', JSON.stringify(savedRecords));
         showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
     }
@@ -96,16 +104,24 @@ function renderCards() {
         const card = document.createElement('div');
         card.className = 'history-card';
         card.onclick = () => openFile(idx);
-        card.innerHTML = `<button class="del-btn" onclick="deleteCard(${idx}, event)">✕</button>
-                          <div style="font-size:12px;opacity:0.5">${rec.date}</div>
-                          <div class="card-sum">${rec.total}</div>`;
+        card.innerHTML = `
+            <button class="del-btn" onclick="deleteCard(${idx}, event)">✕</button>
+            <div style="font-size:12px;opacity:0.5">${rec.date}</div>
+            <div class="card-sum">${rec.total}</div>
+        `;
         container.appendChild(card);
     });
 }
 
 function deleteCard(idx, e) {
     e.stopPropagation();
-    tg.showConfirm("Удалить?", (ok) => { if(ok) { savedRecords.splice(idx, 1); localStorage.setItem('money_logs', JSON.stringify(savedRecords)); renderCards(); } });
+    tg.showConfirm("Удалить?", (ok) => { 
+        if (ok) { 
+            savedRecords.splice(idx, 1); 
+            localStorage.setItem('money_logs', JSON.stringify(savedRecords)); 
+            renderCards(); 
+        } 
+    });
 }
 
 // КОНВЕРТЕР
@@ -139,35 +155,46 @@ function swapCurrencies() {
     convertCurrency();
 }
 
-// Обработка кликов и КЛАВИАТУРЫ
+// КЛИКИ И КЛАВИАТУРА
 function handleGlobalClick(e) { 
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('.bottom-controls')) {
         document.activeElement.blur(); 
     }
 }
 
-// Слушатели для скрытия меню при вводе
 document.addEventListener('focusin', (e) => {
     if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
 });
+
 document.addEventListener('focusout', (e) => {
     if (e.target.tagName === 'INPUT') {
         setTimeout(() => {
-            if (document.activeElement.tagName !== 'INPUT') document.body.classList.remove('keyboard-open');
+            if (document.activeElement.tagName !== 'INPUT') {
+                document.body.classList.remove('keyboard-open');
+            }
         }, 100);
     }
 });
 
 function clearData() {
-    tg.showConfirm("Сбросить всё?", (ok) => { if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } });
+    tg.showConfirm("Сбросить всё?", (ok) => { 
+        if (ok) { 
+            localStorage.clear(); 
+            savedRecords = []; 
+            renderCards(); 
+        } 
+    });
 }
 
 window.onload = () => {
     if (tg.initDataUnsafe?.user) {
         document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
-        if (tg.initDataUnsafe.user.photo_url) document.getElementById('user-photo').src = tg.initDataUnsafe.user.photo_url;
+        if (tg.initDataUnsafe.user.photo_url) {
+            document.getElementById('user-photo').src = tg.initDataUnsafe.user.photo_url;
+        }
     } else {
         document.getElementById('user-name').innerText = "Developer Mode";
     }
-    fetchRates(); renderCards();
+    fetchRates(); 
+    renderCards();
 };
