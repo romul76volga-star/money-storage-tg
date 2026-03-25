@@ -18,14 +18,11 @@ setTheme(localStorage.getItem('user_theme') || 'theme-green');
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    
     document.getElementById('screen-title').innerText = { 
         'screen-home': 'Главная', 'screen-counter': 'Счетчик', 
         'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' 
     }[id];
-
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
-
     const indicator = document.getElementById('tab-indicator');
     if (indicator && idx !== undefined) {
         indicator.style.left = `${(idx * 33.33) + 16.66}%`;
@@ -42,19 +39,24 @@ function createRowElement(name = '', price = '') {
     row.className = 'input-row';
     row.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name" value="${name}">
-        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="validatePrice(this); updateTotal()">
+        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="autoScaleInput(this); updateTotal()">
     `;
+    // Вызываем масштаб при создании, если есть данные
+    const priceInput = row.querySelector('.item-price');
+    if (price) autoScaleInput(priceInput);
     return row;
 }
 
-// Фикс роста строки цены и размера шрифта
-function validatePrice(input) {
-    if (input.value.length > 5) {
-        input.style.fontSize = '12px';
+// Функция масштабирования текста цены
+function autoScaleInput(input) {
+    const length = input.value.length;
+    if (length > 8) {
+        input.style.fontSize = '10px';
+    } else if (length > 5) {
+        input.style.fontSize = '13px';
     } else {
         input.style.fontSize = '16px';
     }
-    if (input.value.length > 9) input.value = input.value.slice(0, 9);
 }
 
 function openFile(index) {
@@ -63,7 +65,7 @@ function openFile(index) {
     list.innerHTML = '';
     if (index === -1) {
         createNewRow();
-        document.getElementById('total-value').innerText = '0 ₽';
+        document.getElementById('total-value').innerText = '0'; // Убрал ₽ отсюда
     } else {
         const record = savedRecords[index];
         record.items.forEach(item => list.appendChild(createRowElement(item.name, item.price)));
@@ -77,11 +79,12 @@ function createNewRow() { document.getElementById('items-list').appendChild(crea
 function updateTotal() {
     let total = 0;
     document.querySelectorAll('.item-price').forEach(i => total += Number(i.value) || 0);
-    document.getElementById('total-value').innerText = total.toLocaleString() + ' ₽';
+    // Исправлено: просто число, символ ₽ уже есть в HTML шаблоне
+    document.getElementById('total-value').innerText = total.toLocaleString();
 }
 
 function saveAndHome() {
-    const total = document.getElementById('total-value').innerText;
+    const total = document.getElementById('total-value').innerText + ' ₽';
     const items = [];
     document.querySelectorAll('.input-row').forEach(row => {
         const n = row.querySelector('.item-name').value;
@@ -118,7 +121,7 @@ function deleteCard(idx, e) {
     tg.showConfirm("Удалить?", (ok) => { if(ok) { savedRecords.splice(idx, 1); localStorage.setItem('money_logs', JSON.stringify(savedRecords)); renderCards(); } });
 }
 
-// КОНВЕРТЕР
+// КОНВЕРТЕР (Упрощенный вызов)
 async function fetchRates() {
     try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -149,34 +152,18 @@ function swapCurrencies() {
     convertCurrency();
 }
 
-// ОБРАБОТКА КЛАВИАТУРЫ И КЛИКОВ
-function handleGlobalClick(e) { 
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('.bottom-controls')) {
-        document.activeElement.blur(); 
-    }
-}
-
-document.addEventListener('focusin', (e) => {
-    if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
-});
-document.addEventListener('focusout', (e) => {
-    if (e.target.tagName === 'INPUT') {
-        setTimeout(() => {
-            if (document.activeElement.tagName !== 'INPUT') document.body.classList.remove('keyboard-open');
-        }, 100);
-    }
-});
-
 function clearData() {
     tg.showConfirm("Сбросить всё?", (ok) => { if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } });
 }
+
+// Слушатели клавиатуры
+document.addEventListener('focusin', (e) => { if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open'); });
+document.addEventListener('focusout', (e) => { setTimeout(() => { if (document.activeElement.tagName !== 'INPUT') document.body.classList.remove('keyboard-open'); }, 100); });
 
 window.onload = () => {
     if (tg.initDataUnsafe?.user) {
         document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
         if (tg.initDataUnsafe.user.photo_url) document.getElementById('user-photo').src = tg.initDataUnsafe.user.photo_url;
-    } else {
-        document.getElementById('user-name').innerText = "Developer Mode";
-    }
+    } else { document.getElementById('user-name').innerText = "Developer"; }
     fetchRates(); renderCards();
 };
