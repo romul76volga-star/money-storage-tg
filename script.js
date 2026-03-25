@@ -9,7 +9,13 @@ let exchangeRates = {};
 function setTheme(theme) {
     document.body.className = theme;
     localStorage.setItem('user_theme', theme);
-    const colors = { 'theme-green': '#5d6b5e', 'theme-black': '#000000', 'theme-white': '#ffffff' };
+    const colors = { 
+        'theme-green': '#5d6b5e', 
+        'theme-black': '#000000', 
+        'theme-white': '#ffffff',
+        'theme-red': '#784f4f',
+        'theme-blue': '#4b6482'
+    };
     tg.setHeaderColor(colors[theme] || '#5d6b5e');
 }
 setTheme(localStorage.getItem('user_theme') || 'theme-green');
