@@ -42,9 +42,19 @@ function createRowElement(name = '', price = '') {
     row.className = 'input-row';
     row.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name" value="${name}">
-        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()">
+        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="validatePrice(this); updateTotal()">
     `;
     return row;
+}
+
+// Фикс роста строки цены и размера шрифта
+function validatePrice(input) {
+    if (input.value.length > 5) {
+        input.style.fontSize = '12px';
+    } else {
+        input.style.fontSize = '16px';
+    }
+    if (input.value.length > 9) input.value = input.value.slice(0, 9);
 }
 
 function openFile(index) {
@@ -139,14 +149,13 @@ function swapCurrencies() {
     convertCurrency();
 }
 
-// Обработка кликов и КЛАВИАТУРЫ
+// ОБРАБОТКА КЛАВИАТУРЫ И КЛИКОВ
 function handleGlobalClick(e) { 
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('.bottom-controls')) {
         document.activeElement.blur(); 
     }
 }
 
-// Слушатели для скрытия меню при вводе
 document.addEventListener('focusin', (e) => {
     if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
 });
