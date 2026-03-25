@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MoneyStorage</title>
+    <title>MoneyStorage Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -24,7 +24,6 @@
 
         <section id="screen-counter" class="screen">
             <div id="items-list" class="scrollable-content"></div>
-            
             <div id="counter-controls" class="bottom-controls">
                 <div class="add-row-trigger" onclick="createNewRow()">
                     <div class="add-box-border"><span>+</span></div>
@@ -55,9 +54,7 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="conv-divider" onclick="swapCurrencies()"><span>⇅</span></div>
-
                     <div class="converter-group">
                         <label class="conv-label">Я получу</label>
                         <div class="conv-row">
@@ -75,7 +72,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="glass-box rate-info-card">
                     <div class="rate-text">Курс: <span id="current-rate-display">загрузка...</span></div>
                     <div class="rate-update-time" id="rate-update-time"></div>
@@ -85,10 +81,34 @@
         </section>
 
         <section id="screen-settings" class="screen">
-            <div class="scrollable-content">
-                <div class="glass-box">
-                    <h3>Профиль</h3>
-                    <button class="danger-btn" onclick="clearData()">Очистить всё</button>
+            <div class="scrollable-content profile-page">
+                <div class="profile-glass-card">
+                    <div class="avatar-container">
+                        <img id="user-photo" src="https://via.placeholder.com/110" alt="Avatar">
+                        <div class="avatar-glow"></div>
+                    </div>
+                    <h2 id="user-name" class="profile-nickname">Загрузка...</h2>
+                    <div class="profile-divider"></div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Версия</span>
+                            <span class="info-value">1.0.0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Статус</span>
+                            <span class="info-value" style="color: #c4ffc4;">Active</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-list">
+                    <button class="settings-btn" onclick="clearData()">
+                        <span class="btn-text">Очистить данные</span>
+                        <span class="btn-icon">🗑️</span>
+                    </button>
+                    <button class="settings-btn" onclick="tg.close()">
+                        <span class="btn-text">Выйти</span>
+                        <span class="btn-icon">🚪</span>
+                    </button>
                 </div>
             </div>
         </section>
