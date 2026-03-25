@@ -139,12 +139,24 @@ function swapCurrencies() {
     convertCurrency();
 }
 
-// Обработка кликов (скрытие клавиатуры)
+// Обработка кликов и КЛАВИАТУРЫ
 function handleGlobalClick(e) { 
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('.bottom-controls')) {
         document.activeElement.blur(); 
     }
 }
+
+// Слушатели для скрытия меню при вводе
+document.addEventListener('focusin', (e) => {
+    if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
+});
+document.addEventListener('focusout', (e) => {
+    if (e.target.tagName === 'INPUT') {
+        setTimeout(() => {
+            if (document.activeElement.tagName !== 'INPUT') document.body.classList.remove('keyboard-open');
+        }, 100);
+    }
+});
 
 function clearData() {
     tg.showConfirm("Сбросить всё?", (ok) => { if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } });
