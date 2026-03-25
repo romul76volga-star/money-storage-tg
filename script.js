@@ -14,15 +14,6 @@ function setTheme(theme) {
 }
 setTheme(localStorage.getItem('user_theme') || 'theme-green');
 
-// ОБРАБОТКА КЛАВИАТУРЫ
-// Добавляем класс при фокусе на инпуты, чтобы скрыть плашки
-document.addEventListener('focusin', (e) => {
-    if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
-});
-document.addEventListener('focusout', (e) => {
-    if (e.target.tagName === 'INPUT') document.body.classList.remove('keyboard-open');
-});
-
 // НАВИГАЦИЯ
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -64,17 +55,14 @@ function openFile(index) {
         createNewRow();
         document.getElementById('total-value').innerText = '0 ₽';
     } else {
-        savedRecords[index].items.forEach(item => list.appendChild(createRowElement(item.name, item.price)));
+        const record = savedRecords[index];
+        record.items.forEach(item => list.appendChild(createRowElement(item.name, item.price)));
         updateTotal();
     }
     showScreen('screen-counter', null, 0);
 }
 
-function createNewRow() { 
-    const list = document.getElementById('items-list');
-    list.appendChild(createRowElement());
-    list.scrollTop = list.scrollHeight;
-}
+function createNewRow() { document.getElementById('items-list').appendChild(createRowElement()); }
 
 function updateTotal() {
     let total = 0;
@@ -83,23 +71,19 @@ function updateTotal() {
 }
 
 function saveAndHome() {
-    const totalText = document.getElementById('total-value').innerText.replace(' ₽', '').replace(/\s/g, '');
+    const total = document.getElementById('total-value').innerText;
     const items = [];
     document.querySelectorAll('.input-row').forEach(row => {
         const n = row.querySelector('.item-name').value;
         const p = row.querySelector('.item-price').value;
         if (n || p) items.push({ name: n, price: p });
     });
-    
     if (items.length > 0) {
         const record = { 
             date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, 
-            total: totalText, 
-            items: items 
+            total, items 
         };
-        if (currentEditingIndex === -1) savedRecords.unshift(record); 
-        else savedRecords[currentEditingIndex] = record;
-        
+        if (currentEditingIndex === -1) savedRecords.unshift(record); else savedRecords[currentEditingIndex] = record;
         localStorage.setItem('money_logs', JSON.stringify(savedRecords));
         showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
     }
@@ -107,32 +91,24 @@ function saveAndHome() {
 
 function renderCards() {
     const container = document.getElementById('cards-container');
-    container.innerHTML = `<div class="history-card" style="border:2px dashed rgba(128,128,128,0.3)" onclick="openFile(-1)"><span style="font-size:40px">+</span></div>`;
+    container.innerHTML = `<div class="history-card" style="border:2px dashed rgba(255,255,255,0.2)" onclick="openFile(-1)"><span style="font-size:40px">+</span></div>`;
     savedRecords.forEach((rec, idx) => {
         const card = document.createElement('div');
         card.className = 'history-card';
         card.onclick = () => openFile(idx);
-        card.innerHTML = `
-            <button class="del-btn" onclick="deleteCard(${idx}, event)">✕</button>
-            <div style="font-size:12px; opacity:0.6">${rec.date}</div>
-            <div class="card-sum">${Number(rec.total).toLocaleString()} ₽</div>
-        `;
+        card.innerHTML = `<button class="del-btn" onclick="deleteCard(${idx}, event)">✕</button>
+                          <div style="font-size:12px;opacity:0.5">${rec.date}</div>
+                          <div class="card-sum">${rec.total}</div>`;
         container.appendChild(card);
     });
 }
 
 function deleteCard(idx, e) {
     e.stopPropagation();
-    tg.showConfirm("Удалить запись?", (ok) => { 
-        if(ok) { 
-            savedRecords.splice(idx, 1); 
-            localStorage.setItem('money_logs', JSON.stringify(savedRecords)); 
-            renderCards(); 
-        } 
-    });
+    tg.showConfirm("Удалить?", (ok) => { if(ok) { savedRecords.splice(idx, 1); localStorage.setItem('money_logs', JSON.stringify(savedRecords)); renderCards(); } });
 }
 
-// КОНВЕРТЕР (Упрощенный вызов)
+// КОНВЕРТЕР
 async function fetchRates() {
     try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -152,7 +128,8 @@ function convertCurrency() {
     if (isNaN(amt) || !exchangeRates[from]) return;
     const res = (amt / exchangeRates[from]) * exchangeRates[to];
     document.getElementById('to-amount').value = res.toFixed(2);
-    document.getElementById('current-rate-display').innerText = `1 ${from} = ${((1/exchangeRates[from])*exchangeRates[to]).toFixed(4)} ${to}`;
+    const rate = (1 / exchangeRates[from]) * exchangeRates[to];
+    document.getElementById('current-rate-display').innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
 }
 
 function swapCurrencies() {
@@ -162,23 +139,23 @@ function swapCurrencies() {
     convertCurrency();
 }
 
+// Обработка кликов (скрытие клавиатуры)
 function handleGlobalClick(e) { 
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('.bottom-controls')) {
         document.activeElement.blur(); 
     }
 }
 
 function clearData() {
-    tg.showConfirm("Сбросить все данные?", (ok) => { 
-        if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } 
-    });
+    tg.showConfirm("Сбросить всё?", (ok) => { if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } });
 }
 
 window.onload = () => {
     if (tg.initDataUnsafe?.user) {
         document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
         if (tg.initDataUnsafe.user.photo_url) document.getElementById('user-photo').src = tg.initDataUnsafe.user.photo_url;
+    } else {
+        document.getElementById('user-name').innerText = "Developer Mode";
     }
-    fetchRates(); 
-    renderCards();
+    fetchRates(); renderCards();
 };
