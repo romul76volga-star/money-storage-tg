@@ -4,13 +4,48 @@ tg.expand();
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 let exchangeRates = {};
-let uiTimeout; // Таймер для управления скрытием UI
+
+// --- ЛОГИКА СКРЫТИЯ UI ПРИ КЛАВИАТУРЕ ---
+
+function updateUIVisibility() {
+    const nav = document.getElementById('bottom-nav');
+    const controls = document.getElementById('counter-controls');
+    
+    // Проверяем: активен ли сейчас какой-то ввод
+    const isInputActive = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT';
+    // Проверяем высоту: если экран стал меньше 550px, значит поднялась клавиатура
+    const isSmallHeight = window.innerHeight < 550;
+
+    if (isInputActive || isSmallHeight) {
+        if (nav) nav.classList.add('hidden');
+        if (controls) controls.classList.add('hidden');
+    } else {
+        // Возвращаем иконки, только если фокус не в поле ввода
+        if (nav) nav.classList.remove('hidden');
+        if (controls) controls.classList.remove('hidden');
+    }
+}
+
+// Слушатели для автоматического скрытия
+window.addEventListener('resize', updateUIVisibility);
+document.addEventListener('focusin', updateUIVisibility);
+document.addEventListener('focusout', () => {
+    // Задержка 150мс, чтобы при переходе из инпута в инпут UI не прыгал
+    setTimeout(updateUIVisibility, 150);
+});
+
+// --- ОСНОВНЫЕ ФУНКЦИИ ПРИЛОЖЕНИЯ ---
 
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
+    const titles = { 
+        'screen-home': 'Главная', 
+        'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 
+        'screen-settings': 'Профиль' 
+    };
     document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
@@ -44,8 +79,8 @@ function createRowElement(name = '', price = '') {
     const row = document.createElement('div');
     row.className = 'input-row';
     row.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name" value="${name}" onfocus="toggleUI(true)" onblur="toggleUI(false)">
-        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+        <input type="text" placeholder="товар..." class="item-name" value="${name}">
+        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()">
     `;
     return row;
 }
@@ -118,30 +153,7 @@ function deleteCard(idx, e) {
     });
 }
 
-// УЛУЧШЕННОЕ УПРАВЛЕНИЕ UI ПРИ КЛАВИАТУРЕ
-function toggleUI(focused) {
-    clearTimeout(uiTimeout); 
-    const nav = document.getElementById('bottom-nav');
-    const controls = document.getElementById('counter-controls');
-    
-    if (focused) {
-        // Скрываем мгновенно при фокусе
-        nav.classList.add('hidden');
-        if (controls) controls.classList.add('hidden');
-    } else {
-        // Возвращаем с задержкой, чтобы проверить, не перешел ли фокус в другой инпут
-        uiTimeout = setTimeout(() => {
-            const active = document.activeElement.tagName;
-            if (active !== 'INPUT' && active !== 'SELECT') {
-                nav.classList.remove('hidden');
-                if (controls) controls.classList.remove('hidden');
-            }
-        }, 100);
-    }
-}
-
 function handleGlobalClick(e) {
-    // Если клик мимо инпута и селекта — убираем фокус
     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
         document.activeElement.blur();
     }
@@ -149,22 +161,30 @@ function handleGlobalClick(e) {
 
 function clearData() {
     tg.showConfirm("Удалить всё?", (ok) => {
-        if(ok) { localStorage.clear(); savedRecords = []; renderCards(); showScreen('screen-home', null, 0); }
+        if(ok) { 
+            localStorage.clear(); 
+            savedRecords = []; 
+            renderCards(); 
+            showScreen('screen-home', null, 0); 
+        }
     });
 }
 
-// КОНВЕРТЕР
+// --- КОНВЕРТЕР ---
+
 async function fetchRates() {
-    const rateDisplay = document.getElementById('current-rate-display');
     try {
         const response = await fetch(`https://open.er-api.com/v6/latest/USD`);
         const data = await response.json();
         if (data && data.result === "success") {
             exchangeRates = data.rates;
-            document.getElementById('rate-update-time').innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
+            const timeEl = document.getElementById('rate-update-time');
+            if (timeEl) timeEl.innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
             convertCurrency();
         }
-    } catch (e) { rateDisplay.innerText = "Ошибка сети"; }
+    } catch (e) { 
+        console.error("Ошибка сети при получении курсов"); 
+    }
 }
 
 function convertCurrency() {
@@ -185,20 +205,30 @@ function convertCurrency() {
         toAmtInput.value = res.toFixed(2);
         
         const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
-        document.getElementById('current-rate-display').innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
+        const display = document.getElementById('current-rate-display');
+        if (display) display.innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
     }
 }
 
 function swapCurrencies() {
     const from = document.getElementById('from-currency');
     const to = document.getElementById('to-currency');
-    [from.value, to.value] = [to.value, from.value];
+    const temp = from.value;
+    from.value = to.value;
+    to.value = temp;
     convertCurrency();
 }
+
+// --- ЗАПУСК ---
 
 window.onload = () => {
     renderCards();
     fetchRates();
-    // Слушатель кликов по всей области приложения
     document.body.addEventListener('click', handleGlobalClick);
+    
+    // Добавляем слушатели на селекты конвертера, чтобы он считал при смене валюты
+    const s1 = document.getElementById('from-currency');
+    const s2 = document.getElementById('to-currency');
+    if (s1) s1.onchange = convertCurrency;
+    if (s2) s2.onchange = convertCurrency;
 };
