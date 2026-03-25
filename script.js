@@ -3,6 +3,7 @@ tg.expand();
 
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
+let exchangeRates = {};
 
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -116,18 +117,17 @@ function deleteCard(idx, e) {
     });
 }
 
-// СКРЫТИЕ ПЛАШЕК ПРИ КЛАВИАТУРЕ
+// ИСПРАВЛЕННОЕ СКРЫТИЕ ПРИ КЛАВИАТУРЕ
 function toggleUI(focused) {
     const nav = document.getElementById('bottom-nav');
     const controls = document.getElementById('counter-controls');
     if (focused) {
-        nav.style.display = 'none';
-        if (controls) controls.style.display = 'none';
+        nav.classList.add('hidden');
+        if (controls) controls.classList.add('hidden');
     } else {
-        // Задержка, чтобы элементы не прыгали раньше времени
         setTimeout(() => {
-            nav.style.display = 'flex';
-            if (controls) controls.style.display = 'block';
+            nav.classList.remove('hidden');
+            if (controls) controls.classList.remove('hidden');
         }, 150);
     }
 }
@@ -142,122 +142,41 @@ function clearData() {
     });
 }
 
-renderCards();
-// --- ЛОГИКА КОНВЕРТЕРА ВАЛЮТ ---
-
-// Переменная для хранения загруженных курсов
-let exchangeRates = {};
-
-// Базовая валюта API (обычно USD)
-const apiBaseCurrency = 'USD';
-
-// Функция получения актуальных курсов валют через API
+// КОНВЕРТЕР
 async function fetchRates() {
     const rateDisplay = document.getElementById('current-rate-display');
-    const timeDisplay = document.getElementById('rate-update-time');
-    const updateBtn = document.querySelector('.update-rates-btn');
-
     try {
-        // Пока идет загрузка, меняем текст
-        rateDisplay.innerText = "updating...";
-        updateBtn.disabled = true; // Отключаем кнопку
-
-        // Используем бесплатный API er-api.com
-        const response = await fetch(`https://open.er-api.com/v6/latest/${apiBaseCurrency}`);
+        const response = await fetch(`https://open.er-api.com/v6/latest/USD`);
         const data = await response.json();
-
         if (data && data.result === "success") {
             exchangeRates = data.rates;
-            
-            // Обновляем UI с временем последнего обновления
-            const now = new Date();
-            timeDisplay.innerText = `Updated at: ${now.toLocaleTimeString()}`;
-            
-            // Выполняем первую конвертацию
+            document.getElementById('rate-update-time').innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
             convertCurrency();
-        } else {
-            throw new Error("Failed to load rates");
         }
-    } catch (error) {
-        console.error("Currency API Error:", error);
-        rateDisplay.innerText = "Error loading rates";
-        timeDisplay.innerText = "Check your internet connection";
-    } finally {
-        // В любом случае возвращаем кнопку в рабочее состояние
-        updateBtn.disabled = false;
-    }
+    } catch (e) { rateDisplay.innerText = "Ошибка сети"; }
 }
 
-// Функция мгновенной конвертации при вводе
 function convertCurrency() {
-    const fromAmountInput = document.getElementById('from-amount');
-    const fromCurrencySelect = document.getElementById('from-currency');
-    const toAmountInput = document.getElementById('to-amount');
-    const toCurrencySelect = document.getElementById('to-currency');
-    const rateDisplay = document.getElementById('current-rate-display');
+    const fromAmt = parseFloat(document.getElementById('from-amount').value);
+    const fromCur = document.getElementById('from-currency').value;
+    const toCur = document.getElementById('to-currency').value;
+    if (!exchangeRates[fromCur] || isNaN(fromAmt)) return;
 
-    // Если курсы еще не загружены, ничего не делаем
-    if (Object.keys(exchangeRates).length === 0) return;
-
-    const fromCurrency = fromCurrencySelect.value;
-    const toCurrency = toCurrencySelect.value;
-    const amount = parseFloat(fromAmountInput.value);
-
-    // Обработка пустых или некорректных вводов
-    if (isNaN(amount) || amount < 0) {
-        toAmountInput.value = "";
-        rateDisplay.innerText = "---";
-        return;
-    }
-
-    // Если валюты одинаковые, результат равен вводу
-    if (fromCurrency === toCurrency) {
-        toAmountInput.value = amount;
-        rateDisplay.innerText = `1 ${fromCurrency} = 1 ${toCurrency}`;
-        return;
-    }
-
-    // Расчет через кросс-курс (оба курса к базовой валюте API, USD)
-    // Formula: (Amount / RateFrom) * RateTo
-    const amountInBase = amount / exchangeRates[fromCurrency];
-    const convertedAmount = amountInBase * exchangeRates[toCurrency];
-
-    // Вывод результата с округлением до 2 знаков
-    toAmountInput.value = convertedAmount.toFixed(2);
-
-    // Обновляем текст текущего курса для этой пары
-    const oneUnitRate = (1 / exchangeRates[fromCurrency]) * exchangeRates[toCurrency];
-    rateDisplay.innerText = `1 ${fromCurrency} = ${oneUnitRate.toFixed(4)} ${toCurrency}`;
+    const res = (fromAmt / exchangeRates[fromCur]) * exchangeRates[toCur];
+    document.getElementById('to-amount').value = res.toFixed(2);
+    
+    const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
+    document.getElementById('current-rate-display').innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
 }
 
-// Функция смены валют местами (⇄)
 function swapCurrencies() {
-    const fromCurrencySelect = document.getElementById('from-currency');
-    const toCurrencySelect = document.getElementById('to-currency');
-    const fromAmountInput = document.getElementById('from-amount');
-    const toAmountInput = document.getElementById('to-amount');
-
-    // Меняем местами выбранные валюты
-    const tempCurrency = fromCurrencySelect.value;
-    fromCurrencySelect.value = toCurrencySelect.value;
-    toCurrencySelect.value = tempCurrency;
-
-    // Опционально: можно поменять местами и суммы, но лучше оставить ввод сверху
-    if (toAmountInput.value) {
-        fromAmountInput.value = toAmountInput.value;
-    }
-
-    // Запускаем пересчет
+    const from = document.getElementById('from-currency');
+    const to = document.getElementById('to-currency');
+    [from.value, to.value] = [to.value, from.value];
     convertCurrency();
 }
 
-// Добавим вызов fetchRates() при инициализации приложения
-// Убедись, что это выполняется после загрузки DOM
-window.addEventListener('load', () => {
-    // Твой существующий код старта приложения...
+window.onload = () => {
     renderCards();
-    createNewRow();
-
-    // Загружаем курсы валют
     fetchRates();
-});
+};
