@@ -5,14 +5,29 @@ let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 let exchangeRates = {};
 
-// --- УПРАВЛЕНИЕ UI И КЛАВИАТУРОЙ ---
+// --- ТЕМЫ ---
+function setTheme(theme) {
+    document.body.classList.remove('theme-green', 'theme-bw');
+    document.body.classList.add(theme);
+    localStorage.setItem('user_theme', theme);
+    
+    // Обновляем цвет хедера в Telegram
+    if (theme === 'theme-bw') {
+        tg.setHeaderColor('#000000');
+    } else {
+        tg.setHeaderColor('#5d6b5e');
+    }
+}
+
+// Загрузка темы при старте
+const savedTheme = localStorage.getItem('user_theme') || 'theme-green';
+setTheme(savedTheme);
+
+// --- UI ---
 function updateUIVisibility() {
     const nav = document.getElementById('bottom-nav');
     const controls = document.getElementById('counter-controls');
-    
-    // Проверяем: активен ли сейчас какой-то ввод
     const isInputActive = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT';
-    // Проверяем высоту: если экран стал меньше 550px, значит поднялась клавиатура
     const isSmallHeight = window.innerHeight < 550;
 
     if (isInputActive || isSmallHeight) {
@@ -33,12 +48,7 @@ function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    const titles = { 
-        'screen-home': 'Главная', 
-        'screen-counter': 'Счетчик', 
-        'screen-converter': 'Конвертер', 
-        'screen-settings': 'Профиль' 
-    };
+    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
     document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
     document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
 
@@ -57,30 +67,23 @@ function showScreen(id, el, idx) {
 function loadTelegramUser() {
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const user = tg.initDataUnsafe.user;
-        const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        document.getElementById('user-name').innerText = fullName;
-        if (user.photo_url) {
-            document.getElementById('user-photo').src = user.photo_url;
-        }
+        document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        if (user.photo_url) document.getElementById('user-photo').src = user.photo_url;
     } else {
         document.getElementById('user-name').innerText = "Developer Mode";
     }
 }
 
-// --- СЧЕТЧИК (УЧЕТ ЗАТРАТ) ---
+// --- КАРТОЧКИ И ЗАТРАТЫ ---
 function openFile(index) {
     currentEditingIndex = index;
     const list = document.getElementById('items-list');
     list.innerHTML = '';
-    
     if (index === -1) {
         createNewRow();
         document.getElementById('total-value').innerText = '0';
     } else {
-        const data = savedRecords[index];
-        data.items.forEach(item => {
-            list.appendChild(createRowElement(item.name, item.price));
-        });
+        savedRecords[index].items.forEach(item => list.appendChild(createRowElement(item.name, item.price)));
         updateTotal();
     }
     showScreen('screen-counter', null, 0);
@@ -89,17 +92,13 @@ function openFile(index) {
 function createRowElement(name = '', price = '') {
     const row = document.createElement('div');
     row.className = 'input-row';
-    row.innerHTML = `
-        <input type="text" placeholder="товар..." class="item-name" value="${name}">
-        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()">
-    `;
+    row.innerHTML = `<input type="text" placeholder="товар..." class="item-name" value="${name}">
+                     <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()">`;
     return row;
 }
 
 function createNewRow() {
-    const list = document.getElementById('items-list');
-    list.appendChild(createRowElement());
-    setTimeout(() => list.scrollTo({top: list.scrollHeight, behavior: 'smooth'}), 100);
+    document.getElementById('items-list').appendChild(createRowElement());
 }
 
 function updateTotal() {
@@ -116,20 +115,9 @@ function saveAndHome() {
         const p = row.querySelector('.item-price').value;
         if (n || p) items.push({ name: n, price: p });
     });
-
     if (items.length > 0) {
-        const record = { 
-            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, 
-            total, 
-            items 
-        };
-        
-        if (currentEditingIndex === -1) {
-            savedRecords.unshift(record);
-        } else {
-            savedRecords[currentEditingIndex] = record;
-        }
-        
+        const record = { date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, total, items };
+        if (currentEditingIndex === -1) savedRecords.unshift(record); else savedRecords[currentEditingIndex] = record;
         localStorage.setItem('money_logs', JSON.stringify(savedRecords));
         showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
     }
@@ -137,40 +125,28 @@ function saveAndHome() {
 
 function renderCards() {
     const container = document.getElementById('cards-container');
-    if (!container) return;
     container.innerHTML = '';
-    
-    // Кнопка добавления новой карточки
     const addCard = document.createElement('div');
     addCard.className = 'history-card';
-    addCard.style.border = '2px dashed rgba(255,255,255,0.3)';
+    addCard.style.border = '2px dashed rgba(255,255,255,0.2)';
     addCard.onclick = () => openFile(-1);
     addCard.innerHTML = `<span style="font-size: 40px; font-weight: 200;">+</span>`;
     container.appendChild(addCard);
 
-    // Список сохраненных карточек
     savedRecords.forEach((rec, index) => {
         const card = document.createElement('div');
         card.className = 'history-card';
         card.onclick = () => openFile(index);
-        card.innerHTML = `
-            <button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
-            <div class="card-date">${rec.date}</div>
-            <div class="card-sum">${rec.total} ₽</div>
-        `;
+        card.innerHTML = `<button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
+                          <div class="card-date">${rec.date}</div>
+                          <div class="card-sum">${rec.total} ₽</div>`;
         container.appendChild(card);
     });
 }
 
 function deleteCard(idx, e) {
     e.stopPropagation();
-    tg.showConfirm("Удалить этот список?", (ok) => {
-        if(ok) {
-            savedRecords.splice(idx, 1);
-            localStorage.setItem('money_logs', JSON.stringify(savedRecords));
-            renderCards();
-        }
-    });
+    tg.showConfirm("Удалить?", (ok) => { if(ok) { savedRecords.splice(idx, 1); localStorage.setItem('money_logs', JSON.stringify(savedRecords)); renderCards(); } });
 }
 
 // --- КОНВЕРТЕР ---
@@ -178,74 +154,44 @@ async function fetchRates() {
     try {
         const response = await fetch(`https://open.er-api.com/v6/latest/USD`);
         const data = await response.json();
-        if (data && data.result === "success") {
+        if (data.result === "success") {
             exchangeRates = data.rates;
-            const timeEl = document.getElementById('rate-update-time');
-            if (timeEl) timeEl.innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
+            document.getElementById('rate-update-time').innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
             convertCurrency();
         }
-    } catch (e) { 
-        console.error("Ошибка сети"); 
-    }
+    } catch (e) { console.error("Ошибка"); }
 }
 
 function convertCurrency() {
-    const fromAmtInput = document.getElementById('from-amount');
-    const toAmtInput = document.getElementById('to-amount');
+    const fromAmt = parseFloat(document.getElementById('from-amount').value);
     const fromCur = document.getElementById('from-currency').value;
     const toCur = document.getElementById('to-currency').value;
-    
-    const fromAmt = parseFloat(fromAmtInput.value);
-    if (isNaN(fromAmt)) {
-        toAmtInput.value = "";
-        return;
-    }
-
+    if (isNaN(fromAmt)) return;
     if (exchangeRates[fromCur] && exchangeRates[toCur]) {
         const res = (fromAmt / exchangeRates[fromCur]) * exchangeRates[toCur];
-        toAmtInput.value = res.toFixed(2);
-        
+        document.getElementById('to-amount').value = res.toFixed(2);
         const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
-        const display = document.getElementById('current-rate-display');
-        if (display) display.innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
+        document.getElementById('current-rate-display').innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
     }
 }
 
 function swapCurrencies() {
     const from = document.getElementById('from-currency');
     const to = document.getElementById('to-currency');
-    const temp = from.value;
-    from.value = to.value;
-    to.value = temp;
+    [from.value, to.value] = [to.value, from.value];
     convertCurrency();
 }
 
-// --- ОБЩЕЕ ---
 function handleGlobalClick(e) {
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
-        document.activeElement.blur();
-    }
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') document.activeElement.blur();
 }
 
 function clearData() {
-    tg.showConfirm("Удалить абсолютно все записи?", (ok) => {
-        if(ok) { 
-            localStorage.clear(); 
-            savedRecords = []; 
-            renderCards(); 
-            showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0); 
-        }
-    });
+    tg.showConfirm("Удалить всё?", (ok) => { if(ok) { localStorage.clear(); savedRecords = []; renderCards(); showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0); } });
 }
 
 window.onload = () => {
     loadTelegramUser();
     renderCards();
     fetchRates();
-    document.body.addEventListener('click', handleGlobalClick);
-    
-    const s1 = document.getElementById('from-currency');
-    const s2 = document.getElementById('to-currency');
-    if (s1) s1.onchange = convertCurrency;
-    if (s2) s2.onchange = convertCurrency;
 };
