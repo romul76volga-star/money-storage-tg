@@ -25,12 +25,12 @@
         <section id="screen-counter" class="screen">
             <div id="items-list" class="scrollable-content"></div>
             <div id="counter-controls" class="bottom-controls">
-                <div class="add-row-trigger" onclick="createNewRow()">
-                    <div class="add-box-border"><span>+</span></div>
+                <div class="add-box-border" onclick="createNewRow()">
+                    <span>+</span>
                 </div>
                 <div id="total-bar" class="total-plate">
                     <div class="total-label">ОБЩАЯ СУММА ЗАТРАТ</div>
-                    <div class="total-sum" id="total-value">0</div>
+                    <div class="total-sum"><span id="total-value">0</span> ₽</div>
                 </div>
             </div>
         </section>
@@ -38,38 +38,34 @@
         <section id="screen-converter" class="screen">
             <div class="scrollable-content converter-page">
                 <div class="converter-main-card">
-                    <div class="conv-row">
+                    <div class="conv-row-simple">
                         <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
-                        <div class="currency-select-wrapper">
-                            <select id="from-currency" class="currency-select" onchange="convertCurrency()">
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="RUB" selected>RUB</option>
-                                <option value="BYN">BYN</option>
-                                <option value="KZT">KZT</option>
-                            </select>
-                        </div>
+                        <select id="from-currency" class="currency-select" onchange="convertCurrency()">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="RUB" selected>RUB</option>
+                            <option value="BYN">BYN</option>
+                            <option value="KZT">KZT</option>
+                        </select>
                     </div>
 
                     <div class="swap-container">
                         <div class="conv-divider" onclick="swapCurrencies()">⇅</div>
                     </div>
 
-                    <div class="conv-row">
+                    <div class="conv-row-simple">
                         <input type="number" id="to-amount" class="conv-input result-input" readonly>
-                        <div class="currency-select-wrapper">
-                            <select id="to-currency" class="currency-select" onchange="convertCurrency()">
-                                <option value="USD" selected>USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="RUB">RUB</option>
-                                <option value="BYN">BYN</option>
-                                <option value="KZT">KZT</option>
-                            </select>
-                        </div>
+                        <select id="to-currency" class="currency-select" onchange="convertCurrency()">
+                            <option value="USD" selected>USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="RUB">RUB</option>
+                            <option value="BYN">BYN</option>
+                            <option value="KZT">KZT</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="glass-box rate-info-card">
+                <div class="rate-info-card">
                     <div class="rate-text"><span id="current-rate-display">загрузка...</span></div>
                     <div class="rate-update-time" id="rate-update-time"></div>
                     <button class="update-rates-btn" onclick="fetchRates()">Обновить курс</button>
@@ -87,7 +83,7 @@
                     <div class="info-grid">
                         <div class="info-box">
                             <span class="info-label">версия</span>
-                            <span class="info-value">1.1.2</span>
+                            <span class="info-value">1.2.0</span>
                         </div>
                         <div class="info-box">
                             <span class="info-label">статус</span>
