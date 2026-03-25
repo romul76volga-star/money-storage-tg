@@ -1,103 +1,67 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
-let currentEditingIndex = -1;
-let exchangeRates = {};
-
-// --- УПРАВЛЕНИЕ UI И КЛАВИАТУРОЙ ---
-function updateUIVisibility() {
-    const nav = document.getElementById('bottom-nav');
-    const controls = document.getElementById('counter-controls');
-    const isInputActive = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT';
-    const isSmallHeight = window.innerHeight < 550;
-
-    if (isInputActive || isSmallHeight) {
-        if (nav) nav.classList.add('hidden');
-        if (controls) controls.classList.add('hidden');
-    } else {
-        if (nav) nav.classList.remove('hidden');
-        if (controls) controls.classList.remove('hidden');
-    }
+:root {
+    --bg: #7a8a7c;
+    --header-dark: rgba(93, 107, 94, 0.9);
+    --yellow: #f2e4b4;
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
 }
 
-window.addEventListener('resize', updateUIVisibility);
-document.addEventListener('focusin', updateUIVisibility);
-document.addEventListener('focusout', () => setTimeout(updateUIVisibility, 150));
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-// --- НАВИГАЦИЯ ---
-function showScreen(id, el, idx) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    
-    const titles = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' };
-    document.getElementById('screen-title').innerText = titles[id] || 'MoneyStorage';
-    document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
-
-    const indicator = document.getElementById('tab-indicator');
-    if (idx !== undefined && indicator) {
-        const pos = (idx * 33.33) + 16.66;
-        indicator.style.left = `${pos}%`;
-        indicator.style.transform = 'translateX(-50%)';
-        document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
-        if (el) el.classList.add('active');
-    }
-    if (id === 'screen-home') renderCards();
+body { 
+    background: var(--bg); 
+    margin: 0; 
+    color: white; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    height: 100vh; 
+    overflow: hidden; 
 }
 
-// --- ЛОГИКА ТЕЛЕГРАМА ---
-function loadTelegramUser() {
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const user = tg.initDataUnsafe.user;
-        document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        if (user.photo_url) {
-            document.getElementById('user-photo').src = user.photo_url;
-        }
-    } else {
-        document.getElementById('user-name').innerText = "Developer Mode";
-    }
+.app-header { height: 60px; background: var(--header-dark); display: flex; align-items: center; padding: 0 20px; z-index: 100; }
+.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; font-weight: 600; }
+.header-check-btn { background: white; color: var(--bg); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+.screen { display: none; height: 100%; flex-direction: column; }
+.screen.active { display: flex; }
+.scrollable-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 120px; }
+
+/* ЭФФЕКТ СТЕКЛА ДЛЯ КОНВЕРТЕРА И ПРОФИЛЯ */
+.glass-box, .profile-glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 25px;
 }
 
-// --- ВАШИ СТАРЫЕ ФУНКЦИИ (Сокращено для краткости) ---
-function renderCards() {
-    const container = document.getElementById('cards-container');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    const addCard = document.createElement('div');
-    addCard.className = 'history-card';
-    addCard.style.border = '2px dashed rgba(255,255,255,0.3)';
-    addCard.onclick = () => openFile(-1);
-    addCard.innerHTML = `<span style="font-size: 40px; font-weight: 200;">+</span>`;
-    container.appendChild(addCard);
+/* ПРОФИЛЬ СТИЛЬ */
+.profile-page { display: flex; flex-direction: column; align-items: center; padding-top: 30px !important; }
+.profile-glass-card { width: 95%; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.avatar-container { position: relative; width: 110px; height: 110px; margin: 0 auto 15px; }
+.avatar-container img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--yellow); object-fit: cover; position: relative; z-index: 2; }
+.avatar-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--yellow); filter: blur(25px); opacity: 0.15; z-index: 1; }
+.profile-nickname { font-size: 22px; font-weight: 700; margin: 10px 0; }
+.profile-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 40px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.info-label { font-size: 10px; opacity: 0.5; text-transform: uppercase; display: block; }
+.info-value { font-size: 15px; font-weight: 600; }
 
-    savedRecords.forEach((rec, index) => {
-        const card = document.createElement('div');
-        card.className = 'history-card';
-        card.onclick = () => openFile(index);
-        card.innerHTML = `<button class="del-btn" onclick="deleteCard(${index}, event)">✕</button>
-            <div class="card-date">${rec.date}</div>
-            <div class="card-sum">${rec.total} ₽</div>`;
-        container.appendChild(card);
-    });
+.settings-list { width: 95%; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.settings-btn { 
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 18px; padding: 16px 20px; color: white; display: flex; 
+    justify-content: space-between; align-items: center; font-size: 15px; 
 }
 
-// ... (createNewRow, openFile, updateTotal, saveAndHome, deleteCard, handleGlobalClick, fetchRates, convertCurrency, swapCurrencies остаются такими же)
+/* ТАБ-БАР */
+.tab-bar { position: fixed; bottom: 15px; left: 20px; right: 20px; height: 60px; background: #1c1c1c; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+.tab-item img { width: 24px; height: 24px; opacity: 0.4; position: relative; z-index: 5; }
+.tab-item.active img { opacity: 1; }
+#tab-indicator { position: absolute; width: 44px; height: 44px; background: rgba(255,255,255,0.1); border-radius: 50%; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
 
-function clearData() {
-    tg.showConfirm("Удалить все данные?", (ok) => {
-        if(ok) { localStorage.clear(); savedRecords = []; renderCards(); showScreen('screen-home', null, 0); }
-    });
-}
+.hidden { display: none !important; }
 
-window.onload = () => {
-    loadTelegramUser(); // Загружаем профиль
-    renderCards();
-    fetchRates();
-    document.body.addEventListener('click', handleGlobalClick);
-    
-    const s1 = document.getElementById('from-currency');
-    const s2 = document.getElementById('to-currency');
-    if (s1) s1.onchange = convertCurrency;
-    if (s2) s2.onchange = convertCurrency;
-};
+/* Ваши старые стили для карточек и инпутов остаются... */
+.input-row { display: flex; background: white; border-radius: 12px; margin-bottom: 8px; height: 48px; overflow: hidden; }
+.item-name { flex: 1; border: none; padding-left: 15px; font-size: 16px; outline: none; color: #333; }
+.item-price { width: 100px; background: #5d6b5e; border: none; color: white; padding-left: 12px; font-weight: bold; outline: none; }
