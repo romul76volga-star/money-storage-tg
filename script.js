@@ -5,6 +5,7 @@ let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 let exchangeRates = {};
 
+// ТЕМЫ
 function setTheme(theme) {
     document.body.className = theme;
     localStorage.setItem('user_theme', theme);
@@ -13,21 +14,36 @@ function setTheme(theme) {
 }
 setTheme(localStorage.getItem('user_theme') || 'theme-green');
 
-// ИСПРАВЛЕНИЕ РАЗМЕРА ШРИФТА ПРИ ВВОДЕ
-function fixFontSize(input) {
-    if (input.value.length > 8) input.style.fontSize = '10px';
-    else if (input.value.length > 5) input.style.fontSize = '13px';
-    else input.style.fontSize = '16px';
+// НАВИГАЦИЯ
+function showScreen(id, el, idx) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    
+    document.getElementById('screen-title').innerText = { 
+        'screen-home': 'Главная', 'screen-counter': 'Счетчик', 
+        'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' 
+    }[id];
+
+    document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
+
+    const indicator = document.getElementById('tab-indicator');
+    if (indicator && idx !== undefined) {
+        indicator.style.left = `${(idx * 33.33) + 16.66}%`;
+        indicator.style.transform = 'translateX(-50%)';
+        document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
+        if (el) el.classList.add('active');
+    }
+    if (id === 'screen-home') renderCards();
 }
 
+// СЧЕТЧИК
 function createRowElement(name = '', price = '') {
     const row = document.createElement('div');
     row.className = 'input-row';
     row.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name" value="${name}">
-        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="fixFontSize(this); updateTotal()">
+        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()">
     `;
-    if (price) setTimeout(() => fixFontSize(row.querySelector('.item-price')), 10);
     return row;
 }
 
@@ -73,22 +89,12 @@ function saveAndHome() {
     }
 }
 
-function showScreen(id, el, idx) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.getElementById('screen-title').innerText = { 'screen-home': 'Главная', 'screen-counter': 'Счетчик', 'screen-converter': 'Конвертер', 'screen-settings': 'Профиль' }[id];
-    document.getElementById('header-action').classList.toggle('hidden', id !== 'screen-counter');
-    document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
-    if (el) el.classList.add('active');
-    if (id === 'screen-home') renderCards();
-}
-
 function renderCards() {
     const container = document.getElementById('cards-container');
     container.innerHTML = `<div class="history-card" style="border:2px dashed rgba(255,255,255,0.2)" onclick="openFile(-1)"><span style="font-size:40px">+</span></div>`;
     savedRecords.forEach((rec, idx) => {
         const card = document.createElement('div');
-        card.className = 'history-card glass-box';
+        card.className = 'history-card';
         card.onclick = () => openFile(idx);
         card.innerHTML = `<button class="del-btn" onclick="deleteCard(${idx}, event)">✕</button>
                           <div style="font-size:12px;opacity:0.5">${rec.date}</div>
@@ -102,27 +108,55 @@ function deleteCard(idx, e) {
     tg.showConfirm("Удалить?", (ok) => { if(ok) { savedRecords.splice(idx, 1); localStorage.setItem('money_logs', JSON.stringify(savedRecords)); renderCards(); } });
 }
 
+// КОНВЕРТЕР
 async function fetchRates() {
     try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await res.json();
         if (data.result === "success") {
             exchangeRates = data.rates;
-            document.getElementById('rate-update-time').innerText = `Обновлено: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            document.getElementById('rate-update-time').innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
             convertCurrency();
         }
-    } catch (e) {}
+    } catch (e) { console.error("Rates error"); }
 }
 
 function convertCurrency() {
     const amt = parseFloat(document.getElementById('from-amount').value);
     const from = document.getElementById('from-currency').value;
     const to = document.getElementById('to-currency').value;
-    if (!isNaN(amt) && exchangeRates[from]) {
-        const res = (amt / exchangeRates[from]) * exchangeRates[to];
-        document.getElementById('to-amount').value = res.toFixed(2);
+    if (isNaN(amt) || !exchangeRates[from]) return;
+    const res = (amt / exchangeRates[from]) * exchangeRates[to];
+    document.getElementById('to-amount').value = res.toFixed(2);
+    const rate = (1 / exchangeRates[from]) * exchangeRates[to];
+    document.getElementById('current-rate-display').innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+}
+
+function swapCurrencies() {
+    const f = document.getElementById('from-currency');
+    const t = document.getElementById('to-currency');
+    [f.value, t.value] = [t.value, f.value];
+    convertCurrency();
+}
+
+// Обработка кликов и КЛАВИАТУРЫ
+function handleGlobalClick(e) { 
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('.bottom-controls')) {
+        document.activeElement.blur(); 
     }
 }
+
+// Слушатели для скрытия меню при вводе
+document.addEventListener('focusin', (e) => {
+    if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
+});
+document.addEventListener('focusout', (e) => {
+    if (e.target.tagName === 'INPUT') {
+        setTimeout(() => {
+            if (document.activeElement.tagName !== 'INPUT') document.body.classList.remove('keyboard-open');
+        }, 100);
+    }
+});
 
 function clearData() {
     tg.showConfirm("Сбросить всё?", (ok) => { if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } });
@@ -130,11 +164,10 @@ function clearData() {
 
 window.onload = () => {
     if (tg.initDataUnsafe?.user) {
-        document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name.toUpperCase();
+        document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
         if (tg.initDataUnsafe.user.photo_url) document.getElementById('user-photo').src = tg.initDataUnsafe.user.photo_url;
+    } else {
+        document.getElementById('user-name').innerText = "Developer Mode";
     }
     fetchRates(); renderCards();
 };
-
-document.addEventListener('focusin', (e) => { if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open'); });
-document.addEventListener('focusout', (e) => { if (e.target.tagName === 'INPUT') setTimeout(() => { if (document.activeElement.tagName !== 'INPUT') document.body.classList.remove('keyboard-open'); }, 100); });
