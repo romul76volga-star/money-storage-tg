@@ -4,6 +4,7 @@ tg.expand();
 let savedRecords = JSON.parse(localStorage.getItem('money_logs') || '[]');
 let currentEditingIndex = -1;
 let exchangeRates = {};
+let uiTimeout; // Таймер для управления скрытием UI
 
 function showScreen(id, el, idx) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -44,7 +45,7 @@ function createRowElement(name = '', price = '') {
     row.className = 'input-row';
     row.innerHTML = `
         <input type="text" placeholder="товар..." class="item-name" value="${name}" onfocus="toggleUI(true)" onblur="toggleUI(false)">
-        <input type="number" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
+        <input type="number" inputmode="decimal" class="item-price" placeholder="0" value="${price}" oninput="updateTotal()" onfocus="toggleUI(true)" onblur="toggleUI(false)">
     `;
     return row;
 }
@@ -117,23 +118,33 @@ function deleteCard(idx, e) {
     });
 }
 
-// ИСПРАВЛЕННОЕ СКРЫТИЕ ПРИ КЛАВИАТУРЕ
+// УЛУЧШЕННОЕ УПРАВЛЕНИЕ UI ПРИ КЛАВИАТУРЕ
 function toggleUI(focused) {
+    clearTimeout(uiTimeout); 
     const nav = document.getElementById('bottom-nav');
     const controls = document.getElementById('counter-controls');
+    
     if (focused) {
+        // Скрываем мгновенно при фокусе
         nav.classList.add('hidden');
         if (controls) controls.classList.add('hidden');
     } else {
-        setTimeout(() => {
-            nav.classList.remove('hidden');
-            if (controls) controls.classList.remove('hidden');
-        }, 150);
+        // Возвращаем с задержкой, чтобы проверить, не перешел ли фокус в другой инпут
+        uiTimeout = setTimeout(() => {
+            const active = document.activeElement.tagName;
+            if (active !== 'INPUT' && active !== 'SELECT') {
+                nav.classList.remove('hidden');
+                if (controls) controls.classList.remove('hidden');
+            }
+        }, 100);
     }
 }
 
 function handleGlobalClick(e) {
-    if (e.target.tagName !== 'INPUT') document.activeElement.blur();
+    // Если клик мимо инпута и селекта — убираем фокус
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+        document.activeElement.blur();
+    }
 }
 
 function clearData() {
@@ -157,16 +168,25 @@ async function fetchRates() {
 }
 
 function convertCurrency() {
-    const fromAmt = parseFloat(document.getElementById('from-amount').value);
+    const fromAmtInput = document.getElementById('from-amount');
+    const toAmtInput = document.getElementById('to-amount');
     const fromCur = document.getElementById('from-currency').value;
     const toCur = document.getElementById('to-currency').value;
-    if (!exchangeRates[fromCur] || isNaN(fromAmt)) return;
-
-    const res = (fromAmt / exchangeRates[fromCur]) * exchangeRates[toCur];
-    document.getElementById('to-amount').value = res.toFixed(2);
     
-    const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
-    document.getElementById('current-rate-display').innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
+    const fromAmt = parseFloat(fromAmtInput.value);
+    
+    if (isNaN(fromAmt)) {
+        toAmtInput.value = "";
+        return;
+    }
+
+    if (exchangeRates[fromCur] && exchangeRates[toCur]) {
+        const res = (fromAmt / exchangeRates[fromCur]) * exchangeRates[toCur];
+        toAmtInput.value = res.toFixed(2);
+        
+        const rate = (1 / exchangeRates[fromCur]) * exchangeRates[toCur];
+        document.getElementById('current-rate-display').innerText = `1 ${fromCur} = ${rate.toFixed(4)} ${toCur}`;
+    }
 }
 
 function swapCurrencies() {
@@ -179,4 +199,6 @@ function swapCurrencies() {
 window.onload = () => {
     renderCards();
     fetchRates();
+    // Слушатель кликов по всей области приложения
+    document.body.addEventListener('click', handleGlobalClick);
 };
