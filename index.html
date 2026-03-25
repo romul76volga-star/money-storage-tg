@@ -37,43 +37,40 @@
 
         <section id="screen-converter" class="screen">
             <div class="scrollable-content converter-page">
-                <div class="glass-box converter-card">
-                    <div class="converter-group">
-                        <label class="conv-label">У меня есть</label>
-                        <div class="conv-row">
-                            <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
-                            <div class="currency-select-wrapper">
-                                <select id="from-currency" class="currency-select" onchange="convertCurrency()">
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="RUB" selected>RUB</option>
-                                    <option value="BYN">BYN</option>
-                                    <option value="KZT">KZT</option>
-                                </select>
-                                <span class="select-arrow"></span>
-                            </div>
+                <div class="converter-main-card">
+                    <div class="conv-row">
+                        <input type="number" id="from-amount" class="conv-input" value="100" oninput="convertCurrency()">
+                        <div class="currency-select-wrapper">
+                            <select id="from-currency" class="currency-select" onchange="convertCurrency()">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="RUB" selected>RUB</option>
+                                <option value="BYN">BYN</option>
+                                <option value="KZT">KZT</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="conv-divider" onclick="swapCurrencies()"><span>⇅</span></div>
-                    <div class="converter-group">
-                        <label class="conv-label">Я получу</label>
-                        <div class="conv-row">
-                            <input type="number" id="to-amount" class="conv-input result-input" readonly>
-                            <div class="currency-select-wrapper">
-                                <select id="to-currency" class="currency-select" onchange="convertCurrency()">
-                                    <option value="USD" selected>USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="RUB">RUB</option>
-                                    <option value="BYN">BYN</option>
-                                    <option value="KZT">KZT</option>
-                                </select>
-                                <span class="select-arrow"></span>
-                            </div>
+
+                    <div class="swap-container">
+                        <div class="conv-divider" onclick="swapCurrencies()">⇅</div>
+                    </div>
+
+                    <div class="conv-row">
+                        <input type="number" id="to-amount" class="conv-input result-input" readonly>
+                        <div class="currency-select-wrapper">
+                            <select id="to-currency" class="currency-select" onchange="convertCurrency()">
+                                <option value="USD" selected>USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="RUB">RUB</option>
+                                <option value="BYN">BYN</option>
+                                <option value="KZT">KZT</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+
                 <div class="glass-box rate-info-card">
-                    <div class="rate-text">Курс: <span id="current-rate-display">загрузка...</span></div>
+                    <div class="rate-text"><span id="current-rate-display">загрузка...</span></div>
                     <div class="rate-update-time" id="rate-update-time"></div>
                     <button class="update-rates-btn" onclick="fetchRates()">Обновить курс</button>
                 </div>
@@ -82,36 +79,43 @@
 
         <section id="screen-settings" class="screen">
             <div class="scrollable-content profile-page">
-                <div class="profile-glass-card">
+                <div class="profile-card">
                     <div class="avatar-container">
                         <img id="user-photo" src="https://via.placeholder.com/110" alt="Avatar">
-                        <div class="avatar-glow"></div>
                     </div>
                     <h2 id="user-name" class="profile-nickname">Загрузка...</h2>
-                    <div class="profile-divider"></div>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Версия</span>
-                            <span class="info-value">1.1.0</span>
+                        <div class="info-box">
+                            <span class="info-label">версия</span>
+                            <span class="info-value">1.1.2</span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Статус</span>
+                        <div class="info-box">
+                            <span class="info-label">статус</span>
                             <span id="user-status" class="info-value">Active</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="theme-selector">
-                    <h3 class="settings-title">Оформление</h3>
-                    <div class="theme-options">
-                        <button class="theme-opt-btn" onclick="setTheme('theme-green')">Зеленый</button>
-                        <button class="theme-opt-btn" onclick="setTheme('theme-bw')">Ч/Б Стиль</button>
+                <div class="settings-section">
+                    <div class="theme-grid">
+                        <div class="theme-item" onclick="setTheme('theme-black')">
+                            <div class="theme-circle t-black"></div>
+                            <span>Черный</span>
+                        </div>
+                        <div class="theme-item" onclick="setTheme('theme-white')">
+                            <div class="theme-circle t-white"></div>
+                            <span>Белый</span>
+                        </div>
+                        <div class="theme-item" onclick="setTheme('theme-green')">
+                            <div class="theme-circle t-green"></div>
+                            <span>Зеленый</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="settings-list">
-                    <button class="settings-btn" onclick="clearData()">Очистить данные</button>
-                    <button class="settings-btn" onclick="tg.close()">Выйти</button>
+                <div class="settings-actions">
+                    <button class="action-btn" onclick="clearData()">Очистить данные</button>
+                    <button class="action-btn" onclick="tg.close()">Выйти</button>
                 </div>
             </div>
         </section>
