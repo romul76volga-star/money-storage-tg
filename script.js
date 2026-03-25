@@ -14,7 +14,8 @@ function setTheme(theme) {
 }
 setTheme(localStorage.getItem('user_theme') || 'theme-green');
 
-// ОБРАБОТКА КЛАВИАТУРЫ (Исправление перекрытия)
+// ОБРАБОТКА КЛАВИАТУРЫ
+// Добавляем класс при фокусе на инпуты, чтобы скрыть плашки
 document.addEventListener('focusin', (e) => {
     if (e.target.tagName === 'INPUT') document.body.classList.add('keyboard-open');
 });
@@ -37,6 +38,7 @@ function showScreen(id, el, idx) {
     const indicator = document.getElementById('tab-indicator');
     if (indicator && idx !== undefined) {
         indicator.style.left = `${(idx * 33.33) + 16.66}%`;
+        indicator.style.transform = 'translateX(-50%)';
         document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
         if (el) el.classList.add('active');
     }
@@ -54,11 +56,24 @@ function createRowElement(name = '', price = '') {
     return row;
 }
 
+function openFile(index) {
+    currentEditingIndex = index;
+    const list = document.getElementById('items-list');
+    list.innerHTML = '';
+    if (index === -1) {
+        createNewRow();
+        document.getElementById('total-value').innerText = '0 ₽';
+    } else {
+        savedRecords[index].items.forEach(item => list.appendChild(createRowElement(item.name, item.price)));
+        updateTotal();
+    }
+    showScreen('screen-counter', null, 0);
+}
+
 function createNewRow() { 
     const list = document.getElementById('items-list');
-    list.appendChild(createRowElement()); 
-    // Скролл вниз при добавлении
-    setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
+    list.appendChild(createRowElement());
+    list.scrollTop = list.scrollHeight;
 }
 
 function updateTotal() {
@@ -67,13 +82,96 @@ function updateTotal() {
     document.getElementById('total-value').innerText = total.toLocaleString() + ' ₽';
 }
 
-// Остальные функции (renderCards, fetchRates, convertCurrency) остаются без изменений
-// ... (скопируйте их из вашего исходного кода)
+function saveAndHome() {
+    const totalText = document.getElementById('total-value').innerText.replace(' ₽', '').replace(/\s/g, '');
+    const items = [];
+    document.querySelectorAll('.input-row').forEach(row => {
+        const n = row.querySelector('.item-name').value;
+        const p = row.querySelector('.item-price').value;
+        if (n || p) items.push({ name: n, price: p });
+    });
+    
+    if (items.length > 0) {
+        const record = { 
+            date: currentEditingIndex === -1 ? new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) : savedRecords[currentEditingIndex].date, 
+            total: totalText, 
+            items: items 
+        };
+        if (currentEditingIndex === -1) savedRecords.unshift(record); 
+        else savedRecords[currentEditingIndex] = record;
+        
+        localStorage.setItem('money_logs', JSON.stringify(savedRecords));
+        showScreen('screen-home', document.querySelectorAll('.tab-item')[0], 0);
+    }
+}
+
+function renderCards() {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = `<div class="history-card" style="border:2px dashed rgba(128,128,128,0.3)" onclick="openFile(-1)"><span style="font-size:40px">+</span></div>`;
+    savedRecords.forEach((rec, idx) => {
+        const card = document.createElement('div');
+        card.className = 'history-card';
+        card.onclick = () => openFile(idx);
+        card.innerHTML = `
+            <button class="del-btn" onclick="deleteCard(${idx}, event)">✕</button>
+            <div style="font-size:12px; opacity:0.6">${rec.date}</div>
+            <div class="card-sum">${Number(rec.total).toLocaleString()} ₽</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function deleteCard(idx, e) {
+    e.stopPropagation();
+    tg.showConfirm("Удалить запись?", (ok) => { 
+        if(ok) { 
+            savedRecords.splice(idx, 1); 
+            localStorage.setItem('money_logs', JSON.stringify(savedRecords)); 
+            renderCards(); 
+        } 
+    });
+}
+
+// КОНВЕРТЕР (Упрощенный вызов)
+async function fetchRates() {
+    try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data.result === "success") {
+            exchangeRates = data.rates;
+            document.getElementById('rate-update-time').innerText = `Обновлено: ${new Date().toLocaleTimeString()}`;
+            convertCurrency();
+        }
+    } catch (e) { console.error("Rates error"); }
+}
+
+function convertCurrency() {
+    const amt = parseFloat(document.getElementById('from-amount').value);
+    const from = document.getElementById('from-currency').value;
+    const to = document.getElementById('to-currency').value;
+    if (isNaN(amt) || !exchangeRates[from]) return;
+    const res = (amt / exchangeRates[from]) * exchangeRates[to];
+    document.getElementById('to-amount').value = res.toFixed(2);
+    document.getElementById('current-rate-display').innerText = `1 ${from} = ${((1/exchangeRates[from])*exchangeRates[to]).toFixed(4)} ${to}`;
+}
+
+function swapCurrencies() {
+    const f = document.getElementById('from-currency');
+    const t = document.getElementById('to-currency');
+    [f.value, t.value] = [t.value, f.value];
+    convertCurrency();
+}
 
 function handleGlobalClick(e) { 
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.classList.contains('add-box-border')) {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
         document.activeElement.blur(); 
     }
+}
+
+function clearData() {
+    tg.showConfirm("Сбросить все данные?", (ok) => { 
+        if(ok) { localStorage.clear(); savedRecords = []; renderCards(); } 
+    });
 }
 
 window.onload = () => {
